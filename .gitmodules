@@ -1,0 +1,3 @@
+[submodule "santedb-dc-core"]
+	path = santedb-dc-core
+	url = https://github.com/santedb/santedb-dc-core
