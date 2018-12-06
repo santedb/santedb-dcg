@@ -23,6 +23,7 @@
     <name lang="en">SanteDB Disconnected Gateway</name>
     <author>Mohawk College of Applied Arts and Technology - mHealth &amp; eHealth Development &amp; Innovation Centre</author>
   </info>
+
   <strings lang="en">
     <string key="org.santedb.dcg.hl7">HL7v2 / LLP</string>
 
@@ -36,5 +37,15 @@
     <string key="ui.config.hl7.security.help">Indicate the authentication scheme for applications (note MSH-8 is always required for DEVICE prinicipals)</string>
     <string key="ui.config.hl7.endpoint.label">Endpoint</string>
     <string key="ui.config.hl7.endpoint.help">Indicate the endpoint where clients will send their HL7v2 messages to this DCG instance.</string>
+
+    <string key="org.santedb.dcg.sg">S/G Audit</string>
+
+    <!-- Configuration  -->
+    <string key="ui.config.sg.noConfig">There was no configuration or service to send/receive SYSLOG messages. This panel has been disabled</string>
+    <string key="ui.config.sg.esite.label">Default Site ID</string>
+    <string key="ui.config.sg.esite.help">This disconnected gateway will use the default enterprise site ID if none is supplied</string>
+    <string key="ui.config.sg.endpoint.label">Endpoint</string>
+    <string key="ui.config.sg.endpoint.help">Indicate the endpoint where clients will send their SYSLOG messages to this DCG instance.</string>
+
   </strings>
 </AppletManifest>
