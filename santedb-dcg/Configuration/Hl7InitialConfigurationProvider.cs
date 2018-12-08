@@ -35,9 +35,9 @@ namespace SanteDB.Dcg.Configuration
                         DomainName = "LOCAL_AUTH"
                     },
                     Security = SecurityMethod.Msh8,
-                    Services = new List<ServiceDefinition>()
+                    Services = new List<Hl7ServiceDefinition>()
                     {
-                        new ServiceDefinition()
+                        new Hl7ServiceDefinition()
                         {
                             AddressXml = "llp://127.0.0.1:12100",
                             Name = "Default Endpoint",

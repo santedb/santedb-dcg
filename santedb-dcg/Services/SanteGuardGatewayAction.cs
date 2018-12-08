@@ -38,17 +38,27 @@ namespace SanteDB.Dcg.Services
         {
             ApplicationServiceContext.Current.GetService<IThreadPoolService>().QueueUserWorkItem(o =>
             {
-                var audit = ((MessageUtil.ParseAuditResult)o).Message.ToAudit().ToAuditData();
-                if (audit != null)
+                var parseResult = ((MessageUtil.ParseAuditResult)o);
+                if (parseResult.Message == null)
                 {
-                    audit = ApplicationServiceContext.Current.GetService<IAuditRepositoryService>().Insert(audit);
-                    this.m_tracer.TraceInfo("Stored audit {0}", audit.Key);
+                    this.m_tracer.TraceError("Could not process audit:");
+                    foreach (var m in parseResult.Details)
+                        this.m_tracer.TraceError("\t{0}:{1}", m.Priority, m.Text);
                 }
                 else
                 {
-                    this.m_tracer.TraceError("Invalid audit message received");
-                    foreach(var i in ((MessageUtil.ParseAuditResult)o).Details)
-                        this.m_tracer.TraceError("{0} : {1}", i.Priority, i.Text);
+                    var audit = ((MessageUtil.ParseAuditResult)o).Message.ToAudit().ToAuditData();
+                    if (audit != null)
+                    {
+                        audit = ApplicationServiceContext.Current.GetService<IAuditRepositoryService>().Insert(audit);
+                        this.m_tracer.TraceInfo("Stored audit {0}", audit.Key);
+                    }
+                    else
+                    {
+                        this.m_tracer.TraceError("Invalid audit message received");
+                        foreach (var i in ((MessageUtil.ParseAuditResult)o).Details)
+                            this.m_tracer.TraceError("{0} : {1}", i.Priority, i.Text);
+                    }
                 }
             }, MessageUtil.ParseAudit(e.Message));
         }
