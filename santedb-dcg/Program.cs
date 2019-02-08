@@ -37,6 +37,7 @@ using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace SanteDB.Dcg
 {
@@ -45,6 +46,12 @@ namespace SanteDB.Dcg
     /// </summary>
     static class Program
     {
+
+        /// <summary>
+        /// Quit event
+        /// </summary>
+        static ManualResetEvent m_quitEvent = new ManualResetEvent(false);
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -61,6 +68,12 @@ namespace SanteDB.Dcg
             Console.WriteLine("{0}", entryAsm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright);
             Console.WriteLine("Complete Copyright information available at http://github.com/santedb/santedb-www");
 
+            Console.CancelKeyPress += (o, e) =>
+            {
+                m_quitEvent.Set();
+                e.Cancel = true;
+            };
+
             try
             {
 
@@ -73,8 +86,8 @@ namespace SanteDB.Dcg
 
                 // Setup basic parameters
                 String[] directory = {
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDBWWW", parms.InstanceName),
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDBWWW", parms.InstanceName)
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName),
+                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName)
                 };
 
                 foreach (var dir in directory)
@@ -126,11 +139,17 @@ namespace SanteDB.Dcg
 
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
-                    Console.WriteLine("Press [Enter] key to close...");
-                    Console.ReadLine();
-                    DcApplicationContext.Current.Stop();
 
+                    if (!parms.Forever)
+                    {
+                        Console.WriteLine("Press [Enter] key to close...");
+                        Console.ReadLine();
+                    }
+                    else
+                        m_quitEvent.WaitOne();
+                    DcApplicationContext.Current.Stop();
                 }
+
                 else if (parms.Install)
                 {
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";

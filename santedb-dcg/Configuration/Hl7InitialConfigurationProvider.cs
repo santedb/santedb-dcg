@@ -35,6 +35,7 @@ namespace SanteDB.Dcg.Configuration
                         DomainName = "LOCAL_AUTH"
                     },
                     Security = SecurityMethod.Msh8,
+                    Interceptors = new List<Hl7InterceptorConfigurationElement>(),
                     Services = new List<Hl7ServiceDefinition>()
                     {
                         new Hl7ServiceDefinition()

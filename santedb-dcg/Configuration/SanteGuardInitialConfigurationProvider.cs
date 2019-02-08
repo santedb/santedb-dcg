@@ -33,7 +33,7 @@ namespace SanteDB.Dcg.Configuration
                     {
                         new EndpointConfiguration()
                         {
-                            AddressXml = "udp://127.0.0.1:514",
+                            AddressXml = "udp://127.0.0.1:11514",
                             Name = "Audit UDP",
                             MaxSize = ushort.MaxValue,
                             ReadTimeout = new TimeSpan(0, 0, 15),

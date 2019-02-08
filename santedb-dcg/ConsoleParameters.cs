@@ -94,5 +94,11 @@ namespace SanteDB.Dcg
         [Parameter("appsecret")]
         public String ApplicationSecret { get; set; }
 
+        /// <summary>
+        /// Start in noninteractive method
+        /// </summary>
+        [Description("Do not quit when the ENTER key is pressed")]
+        [Parameter("daemon")]
+        public bool Forever { get; internal set; }
     }
 }
