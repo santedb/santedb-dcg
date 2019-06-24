@@ -38,6 +38,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using SanteDB.Core.Configuration;
 
 namespace SanteDB.Dcg
 {
@@ -137,8 +138,8 @@ namespace SanteDB.Dcg
                     if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity))
                         DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity);
 
-                    DcApplicationContext.Current.Configuration.GetSection<ApplicationConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
-                    DcApplicationContext.Current.Configuration.GetSection<ApplicationConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+                    DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
+                    DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
 
                     if (!parms.Forever)
                     {
