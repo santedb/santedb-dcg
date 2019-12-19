@@ -24,7 +24,7 @@ namespace SanteDB.Dcg.Configuration
         {
             if (existing.GetSection<SanteGuardConfiguration>() == null)
             {
-                existing.GetSection<ApplicationServiceContextConfigurationSection>().ServiceTypes.Add(typeof(SanteGuard.Messaging.Syslog.SyslogMessageHandler).AssemblyQualifiedName);
+                existing.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteGuard.Messaging.Syslog.SyslogMessageHandler)));
 
                 existing.AddSection(new SanteGuardConfiguration()
                 {
