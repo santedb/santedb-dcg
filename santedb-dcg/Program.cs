@@ -75,6 +75,18 @@ namespace SanteDB.Dcg
                 e.Cancel = true;
             };
 
+            AppDomain.CurrentDomain.AssemblyResolve += (o, e) =>
+            {
+                string pAsmName = e.Name;
+                if (pAsmName.Contains(","))
+                    pAsmName = pAsmName.Substring(0, pAsmName.IndexOf(","));
+
+                var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => e.Name == a.FullName) ??
+                    AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => pAsmName == a.GetName().Name);
+                return asm;
+            };
+
+
             try
             {
 

@@ -15,7 +15,7 @@
  * the License.
  * 
  * User: justin
- * Date: 2018-10-14
+ * Date: 2018-7-4
  */
 
 // SanteDB Self-Hosted SHIM
@@ -32,6 +32,7 @@ __SanteDBAppService.GetOnlineState = function () {
     return true;
 }
 
+
 __SanteDBAppService.IsAdminAvailable = function () {
     return true;
 }
@@ -39,6 +40,7 @@ __SanteDBAppService.IsAdminAvailable = function () {
 __SanteDBAppService.IsClinicalAvailable = function () {
     return true;
 }
+
 
 __SanteDBAppService.BarcodeScan = function () {
     return SanteDBApplicationService.NewGuid().substring(0, 8);
@@ -56,7 +58,7 @@ __SanteDBAppService.GetLocale = function () {
 __SanteDBAppService.NewGuid = function () {
     var retVal = "";
     $.ajax({
-        url: "/__app/uuid",
+        url: "/app/Uuid",
         success: function (data) { retVal = data; },
         async: false
     });
