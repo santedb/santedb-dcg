@@ -68,6 +68,9 @@
     <Compile Include="ServiceTool.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\SanteDB.licenseheader">
+      <Link>SanteDB.licenseheader</Link>
+    </None>
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
