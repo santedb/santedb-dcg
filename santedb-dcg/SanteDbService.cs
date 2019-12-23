@@ -55,17 +55,30 @@ namespace SanteDB.Dcg
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
-            XamarinApplicationContext.ProgressChanged += (o, e) =>
+            try
             {
-                Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
-            };
+                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                {
+                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
+                };
 
-            if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity))
-                DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity);
 
-            
-            DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
-            DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                {
+                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
+                };
+
+                if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity))
+                    DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity);
+
+
+                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
+                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("The service reported an error: {0}", e);
+            }
         }
 
         /// <summary>
@@ -73,7 +86,14 @@ namespace SanteDB.Dcg
         /// </summary>
         protected override void OnStop()
         {
-            DcApplicationContext.Current.Stop();
+            try
+            {
+                DcApplicationContext.Current.Stop();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("The service reported an error on shutdown: {0}", e);
+            }
         }
     }
 }

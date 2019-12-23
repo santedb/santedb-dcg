@@ -39,6 +39,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using SanteDB.Core.Configuration;
+using SanteDB.Core;
+using SanteDB.Core.Applets.Services;
 
 namespace SanteDB.Dcg
 {
@@ -75,6 +77,7 @@ namespace SanteDB.Dcg
                 e.Cancel = true;
             };
 
+            
             AppDomain.CurrentDomain.AssemblyResolve += (o, e) =>
             {
                 string pAsmName = e.Name;
