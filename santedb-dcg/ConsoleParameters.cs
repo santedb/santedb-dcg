@@ -100,5 +100,12 @@ namespace SanteDB.Dcg
         [Description("Do not quit when the ENTER key is pressed")]
         [Parameter("daemon")]
         public bool Forever { get; internal set; }
+
+        /// <summary>
+        /// Use an initial configuration skeleton
+        /// </summary>
+        [Description("Use an initial configuration skeleton for this deployment")]
+        [Parameter("skel")]
+        public string Skel { get; set; }
     }
 }
