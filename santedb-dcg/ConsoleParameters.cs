@@ -73,6 +73,13 @@ namespace SanteDB.Dcg
         public bool Uninstall { get; set; }
 
         /// <summary>
+        /// Restarts the service
+        /// </summary>
+        [Description("Restart the specified service")]
+        [Parameter("restart")]
+        public bool Restart { get; set; }
+
+        /// <summary>
         /// Reset the service installation
         /// </summary>
         [Description("Resets the configuration of this WWW instance to default")]

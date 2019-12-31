@@ -185,6 +185,22 @@ namespace SanteDB.Dcg
                     else
                         throw new InvalidOperationException("Service instance already installed");
                 }
+                else if(parms.Restart)
+                {
+                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
+                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                    {
+                        try
+                        {
+                            ServiceTools.ServiceInstaller.StopService(serviceName);
+                        }
+                        catch(Exception e) { Console.Write("Could not start service: {0}", e.Message); }
+                        try { ServiceTools.ServiceInstaller.StartService(serviceName); }
+                        catch(Exception e) { Console.Write("Could not start service: {0}", e.Message); }
+                    }
+                    else
+                        throw new InvalidOperationException("Service instance not installed");
+                }
                 else if (parms.Uninstall)
                 {
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";
