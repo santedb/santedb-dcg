@@ -41,6 +41,7 @@ using System.Threading;
 using SanteDB.Core.Configuration;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
+using SanteDB.Core.Services.Impl;
 
 namespace SanteDB.Dcg
 {
@@ -92,12 +93,12 @@ namespace SanteDB.Dcg
 
             try
             {
-
+                
                 // Security Application Information
                 var applicationIdentity = new SecurityApplication()
                 {
                     ApplicationSecret = parms.ApplicationSecret ?? "SDB$$DEFAULT$$APPSECRET",
-                    Name = parms.ApplicationName ?? "org.santedb.disconnected_client"
+                    Name = parms.ApplicationName ?? "org.santedb.disconnected_client.gateway"
                 };
 
                 // Setup basic parameters
@@ -150,8 +151,8 @@ namespace SanteDB.Dcg
                     };
 
                     
-                    if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity))
-                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity);
+                    if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway))
+                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway);
 
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
