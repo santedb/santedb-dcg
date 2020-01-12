@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santedb.org"
-#define MyAppVersion "1.110.0"
+#define MyAppVersion "1.117.0"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -100,9 +100,10 @@ Filename: "http://127.0.0.1:9200"; Name: "{commondesktop}\Disconnected Gateway";
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Installing Services..."; Parameters: "--install"; Description: "Installing Service"; Flags: runhidden
 Filename: "net.exe";StatusMsg: "Starting Services..."; Parameters: "start sdb-dcg-default"; Description: "Start Gateway Service"; Flags: runhidden
 Filename: "http://127.0.0.1:9200"; Description: "Configure the Disconnected Gateway"; Flags: postinstall shellexec
+Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway TCP"" dir=in protocol=TCP localport=9200,12100 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
+Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway UDP"" dir=in protocol=UDP localport=11514 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
 
 [UninstallRun]
-Filename: "net.exe"; StatusMsg: "Stopping Services...";Parameters: "stop sdb-dcg-default"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Configuration Data...";  Parameters: "--reset"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Services..."; Parameters: "--uninstall"; Flags: runhidden
 
