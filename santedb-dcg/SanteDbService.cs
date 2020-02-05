@@ -1,6 +1,6 @@
 ﻿/*
- * Copyright 2015-2018 Mohawk College of Applied Arts and Technology
- *
+ * Portions Copyright 2015-2019 Mohawk College of Applied Arts and Technology
+ * Portions Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -14,8 +14,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: justin
- * Date: 2018-10-14
+ * User: Justin Fyfe
+ * Date: 2019-8-8
  */
 using SanteDB.Core.Model.Security;
 using SanteDB.DisconnectedClient.Core.Configuration;
@@ -55,17 +55,30 @@ namespace SanteDB.Dcg
         /// <param name="args">Data passed by the start command.</param>
         protected override void OnStart(string[] args)
         {
-            XamarinApplicationContext.ProgressChanged += (o, e) =>
+            try
             {
-                Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
-            };
+                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                {
+                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
+                };
 
-            if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity))
-                DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity);
 
-            
-            DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
-            DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                {
+                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
+                };
+
+                if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity, Core.SanteDBHostType.Gateway))
+                    DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity, Core.SanteDBHostType.Gateway);
+
+
+                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
+                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("The service reported an error: {0}", e);
+            }
         }
 
         /// <summary>
@@ -73,7 +86,14 @@ namespace SanteDB.Dcg
         /// </summary>
         protected override void OnStop()
         {
-            DcApplicationContext.Current.Stop();
+            try
+            {
+                DcApplicationContext.Current.Stop();
+            }
+            catch (Exception e)
+            {
+                Trace.TraceError("The service reported an error on shutdown: {0}", e);
+            }
         }
     }
 }

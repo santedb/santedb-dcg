@@ -1,6 +1,6 @@
 ﻿/*
- * Copyright 2015-2018 Mohawk College of Applied Arts and Technology
- *
+ * Portions Copyright 2015-2019 Mohawk College of Applied Arts and Technology
+ * Portions Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -14,8 +14,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: justin
- * Date: 2018-10-14
+ * User: Justin Fyfe
+ * Date: 2019-8-8
  */
 using MohawkCollege.Util.Console.Parameters;
 using System;
@@ -73,6 +73,13 @@ namespace SanteDB.Dcg
         public bool Uninstall { get; set; }
 
         /// <summary>
+        /// Restarts the service
+        /// </summary>
+        [Description("Restart the specified service")]
+        [Parameter("restart")]
+        public bool Restart { get; set; }
+
+        /// <summary>
         /// Reset the service installation
         /// </summary>
         [Description("Resets the configuration of this WWW instance to default")]
@@ -100,5 +107,12 @@ namespace SanteDB.Dcg
         [Description("Do not quit when the ENTER key is pressed")]
         [Parameter("daemon")]
         public bool Forever { get; internal set; }
+
+        /// <summary>
+        /// Use an initial configuration skeleton
+        /// </summary>
+        [Description("Use an initial configuration skeleton for this deployment")]
+        [Parameter("skel")]
+        public string Skel { get; set; }
     }
 }

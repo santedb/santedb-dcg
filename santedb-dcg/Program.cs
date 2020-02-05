@@ -1,6 +1,6 @@
 ﻿/*
- * Copyright 2015-2018 Mohawk College of Applied Arts and Technology
- *
+ * Portions Copyright 2015-2019 Mohawk College of Applied Arts and Technology
+ * Portions Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -14,8 +14,8 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: justin
- * Date: 2018-10-14
+ * User: Justin Fyfe
+ * Date: 2019-8-8
  */
 using MohawkCollege.Util.Console.Parameters;
 using SanteDB.Core.Diagnostics;
@@ -39,6 +39,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 using SanteDB.Core.Configuration;
+using SanteDB.Core;
+using SanteDB.Core.Applets.Services;
+using SanteDB.Core.Services.Impl;
 
 namespace SanteDB.Dcg
 {
@@ -75,14 +78,27 @@ namespace SanteDB.Dcg
                 e.Cancel = true;
             };
 
+            
+            AppDomain.CurrentDomain.AssemblyResolve += (o, e) =>
+            {
+                string pAsmName = e.Name;
+                if (pAsmName.Contains(","))
+                    pAsmName = pAsmName.Substring(0, pAsmName.IndexOf(","));
+
+                var asm = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => e.Name == a.FullName) ??
+                    AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(a => pAsmName == a.GetName().Name);
+                return asm;
+            };
+
+
             try
             {
-
+                
                 // Security Application Information
                 var applicationIdentity = new SecurityApplication()
                 {
                     ApplicationSecret = parms.ApplicationSecret ?? "SDB$$DEFAULT$$APPSECRET",
-                    Name = parms.ApplicationName ?? "org.santedb.disconnected_client"
+                    Name = parms.ApplicationName ?? "org.santedb.disconnected_client.gateway"
                 };
 
                 // Setup basic parameters
@@ -135,8 +151,8 @@ namespace SanteDB.Dcg
                     };
 
                     
-                    if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity))
-                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity);
+                    if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway))
+                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway);
 
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
@@ -169,6 +185,22 @@ namespace SanteDB.Dcg
                     }
                     else
                         throw new InvalidOperationException("Service instance already installed");
+                }
+                else if(parms.Restart)
+                {
+                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
+                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                    {
+                        try
+                        {
+                            ServiceTools.ServiceInstaller.StopService(serviceName);
+                        }
+                        catch(Exception e) { Console.Write("Could not start service: {0}", e.Message); }
+                        try { ServiceTools.ServiceInstaller.StartService(serviceName); }
+                        catch(Exception e) { Console.Write("Could not start service: {0}", e.Message); }
+                    }
+                    else
+                        throw new InvalidOperationException("Service instance not installed");
                 }
                 else if (parms.Uninstall)
                 {

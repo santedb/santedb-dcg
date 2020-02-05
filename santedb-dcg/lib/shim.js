@@ -1,6 +1,6 @@
 ﻿/*
- * Copyright 2015-2018 Mohawk College of Applied Arts and Technology
- *
+ * Portions Copyright 2015-2019 Mohawk College of Applied Arts and Technology
+ * Portions Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -14,11 +14,17 @@
  * License for the specific language governing permissions and limitations under 
  * the License.
  * 
- * User: justin
- * Date: 2018-10-14
+ * User: Justin Fyfe
+ * Date: 2019-8-8
  */
 
 // SanteDB Self-Hosted SHIM
+setTimeout(function () {
+    $.getJSON({
+        url: "/app/Online",
+        success: function (data) { __SanteDBAppService.state = data; }
+    });
+}, 10000);
 
 __SanteDBAppService.GetStatus = function () {
     return '[ "Dummy Status", 0 ]';
@@ -29,15 +35,17 @@ __SanteDBAppService.ShowToast = function (string) {
 }
 
 __SanteDBAppService.GetOnlineState = function () {
-    return true;
+    return __SanteDBAppService.state.online;
 }
 
 __SanteDBAppService.IsAdminAvailable = function () {
-    return true;
+    return __SanteDBAppService.state.ami;
+
 }
 
 __SanteDBAppService.IsClinicalAvailable = function () {
-    return true;
+    return __SanteDBAppService.state.hdsi;
+
 }
 
 __SanteDBAppService.BarcodeScan = function () {
@@ -56,7 +64,7 @@ __SanteDBAppService.GetLocale = function () {
 __SanteDBAppService.NewGuid = function () {
     var retVal = "";
     $.ajax({
-        url: "/__app/uuid",
+        url: "/app/Uuid",
         success: function (data) { retVal = data; },
         async: false
     });
