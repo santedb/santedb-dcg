@@ -24,7 +24,7 @@ namespace SanteDB.Dcg.Configuration
             if (!existing.Sections.Any(o => o is SanteDB.Messaging.HL7.Configuration.Hl7ConfigurationSection))
             {
 
-                existing.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(typeof(SanteDB.Messaging.HL7.HL7MessageHandler).AssemblyQualifiedName);
+                existing.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Messaging.HL7.HL7MessageHandler)));
                 var adtHandler = new AdtMessageHandler();
                 var qbpHandler = new QbpMessageHandler();
 
