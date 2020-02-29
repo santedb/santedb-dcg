@@ -72,6 +72,21 @@ namespace SanteDB.Dcg
             Console.WriteLine("{0}", entryAsm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright);
             Console.WriteLine("Complete Copyright information available at http://github.com/santedb/santedb-www");
 
+            // Parameters to force load?
+            if (parms.Force)
+                foreach (var itm in Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "*.dll"))
+                {
+                    try
+                    {
+                        var asm = Assembly.LoadFile(itm);
+                        Console.WriteLine("Force Loaded {0}", asm.FullName);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("ERR: Cannot load {0} due to {1}", itm, e.Message);
+                    }
+                }
+
             Console.CancelKeyPress += (o, e) =>
             {
                 m_quitEvent.Set();

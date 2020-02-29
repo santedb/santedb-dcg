@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("santedb-dcg")]
-[assembly: AssemblyCopyright("Copyright (C) 2018, Fyfe Software Inc.")]
+[assembly: AssemblyCopyright("Copyright (C) 2018 - 2020, Fyfe Software Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,6 +51,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.117.0.0")]
-[assembly: AssemblyFileVersion("1.117.0.0")]
-[assembly: AssemblyInformationalVersion("Iqaliut")]
+[assembly: AssemblyVersion("1.126.0.0")]
+[assembly: AssemblyFileVersion("1.126.0.0")]
+[assembly: AssemblyInformationalVersion("Iqaluit")]

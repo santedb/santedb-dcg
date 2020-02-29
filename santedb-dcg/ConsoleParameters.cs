@@ -114,5 +114,12 @@ namespace SanteDB.Dcg
         [Description("Use an initial configuration skeleton for this deployment")]
         [Parameter("skel")]
         public string Skel { get; set; }
+
+        /// <summary>
+        /// Force loading of DLLs
+        /// </summary>
+        [Description("Force the loading of DLLs (useful on some Linux distros)")]
+        [Parameter("dllForce")]
+        public bool Force { get; set; }
     }
 }
