@@ -18,9 +18,7 @@
  * Date: 2019-8-8
  */
 using SanteDB.Core.Model.Security;
-using SanteDB.DisconnectedClient.Core.Configuration;
 using SanteDB.DisconnectedClient.UI;
-using SanteDB.DisconnectedClient.Xamarin;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -57,13 +55,13 @@ namespace SanteDB.Dcg
         {
             try
             {
-                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
                 {
                     Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
                 };
 
 
-                XamarinApplicationContext.ProgressChanged += (o, e) =>
+                SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
                 {
                     Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
                 };
@@ -78,6 +76,7 @@ namespace SanteDB.Dcg
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error: {0}", e);
+                Environment.FailFast($"Error starting DCG service: {e.Message}");
             }
         }
 
@@ -93,6 +92,8 @@ namespace SanteDB.Dcg
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error on shutdown: {0}", e);
+                Environment.FailFast($"Error stopping DCG service: {e.Message}");
+
             }
         }
     }

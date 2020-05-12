@@ -19,7 +19,7 @@
  */
 using SanteDB.Core.Configuration;
 using SanteDB.Dcg.Services;
-using SanteDB.DisconnectedClient.Core.Configuration;
+using SanteDB.DisconnectedClient.Configuration;
 using SanteDB.DisconnectedClient.UI;
 using SanteGuard.Configuration;
 using System;

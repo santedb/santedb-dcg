@@ -21,10 +21,6 @@ using MohawkCollege.Util.Console.Parameters;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Security;
 using SanteDB.DisconnectedClient.UI;
-using SanteDB.DisconnectedClient.Core.Configuration;
-using SanteDB.DisconnectedClient.Xamarin;
-using SanteDB.DisconnectedClient.Xamarin.Diagnostics;
-using SanteDB.DisconnectedClient.Xamarin.Security;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,6 +38,7 @@ using SanteDB.Core.Configuration;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Services.Impl;
+using SanteDB.DisconnectedClient.Security;
 
 namespace SanteDB.Dcg
 {
@@ -150,15 +147,24 @@ namespace SanteDB.Dcg
 
                 if (parms.ShowHelp)
                     parser.WriteHelp(Console.Out);
+                else if(parms.Reset)
+                {
+                    var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName);
+                    var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName);
+                    if (Directory.Exists(appData)) Directory.Delete(cData, true);
+                    if (Directory.Exists(appData)) Directory.Delete(appData, true);
+                    Console.WriteLine("Environment Reset Successful");
+                    return;
+                }
                 else if (parms.ConsoleMode)
                 {
 #if DEBUG
-                    Tracer.AddWriter(new DisconnectedClient.Xamarin.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #else
                     Tracer.AddWriter(new LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #endif
 
-                    XamarinApplicationContext.ProgressChanged += (o, e) =>
+                    SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
                     {
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.WriteLine(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);

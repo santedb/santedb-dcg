@@ -18,7 +18,7 @@
  * Date: 2019-8-8
  */
 using SanteDB.Core.Configuration;
-using SanteDB.DisconnectedClient.Core.Configuration;
+using SanteDB.DisconnectedClient.Configuration;
 using SanteDB.DisconnectedClient.UI;
 using SanteDB.Messaging.HL7.Configuration;
 using SanteDB.Messaging.HL7.Messages;
