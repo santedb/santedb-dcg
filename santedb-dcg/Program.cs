@@ -161,7 +161,7 @@ namespace SanteDB.Dcg
 #if DEBUG
                     Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #else
-                    Tracer.AddWriter(new LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #endif
 
                     SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>

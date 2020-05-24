@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santedb.org"
-#define MyAppVersion "1.117.0"
+#define MyAppVersion "2.0.10"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -26,6 +26,7 @@ OutputBaseFilename=santedb-dcg-{#MyAppVersion}
 Compression=bzip
 SolidCompression=yes
 DefaultGroupName={#MyAppName}
+WizardStyle=modern
 ;SignedUninstaller=yes
 ;SignTool=default
 
@@ -39,7 +40,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: ".\bin\SignedRelease\Antlr3.Runtime.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\AtnaApi.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\ExpressionEvaluator.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\jint.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\Jint.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\libeay32md.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\MARC.Everest.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\MohawkCollege.Util.Console.Parameters.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -64,7 +65,6 @@ Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.Core.dll"; DestDir: "{ap
 Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.i18n.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.UI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.Xamarin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SanteDB.Messaging.AMI.Client.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SanteDB.Messaging.HDSI.Client.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SanteDB.Messaging.HL7.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -78,18 +78,27 @@ Source: ".\bin\SignedRelease\SanteGuard.Messaging.Syslog.dll"; DestDir: "{app}";
 Source: ".\bin\SignedRelease\SharpCompress.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SqlCipher.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\SQLite.Net.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SQLite.Net.Platform.Generic.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SQLite.Net.Platform.SqlCipher.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SQLite.Net.Platform.Win32.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\SQLite.Net.Platform.*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Net.IPNetwork.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Buffers.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\System.Data.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Runtime.InteropServices.RuntimeInformation.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Diagnostics.PerformanceCounter.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Numerics.Vectors.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Security.AccessControl.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Security.Permissions.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Security.Principal.Windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\System.Text.Encoding.CodePages.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\System.Transactions.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\fr\SanteDB.DisconnectedClient.i18n.resources.dll"; DestDir: "{app}\fr"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: ".\installsupp\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: dontcopy;
+Source: ".\installsupp\netfx.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 
 [Icons]
 Filename: "http://127.0.0.1:9200"; Name: "{group}\SanteDB\Disconnected Gateway Admin"; IconFilename: "{app}\santedb-dcg.exe"
@@ -104,6 +113,7 @@ Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add
 Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway UDP"" dir=in protocol=UDP localport=11514 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
 
 [UninstallRun]
+Filename: "net.exe";StatusMsg: "Stopping Services..."; Parameters: "stop sdb-dcg-default"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Configuration Data...";  Parameters: "--reset"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Services..."; Parameters: "--uninstall"; Flags: runhidden
 
@@ -117,4 +127,6 @@ begin
     EnableFsRedirection(true);
     ExtractTemporaryFile('vcredist_x86.exe');
     Exec(ExpandConstant('{tmp}\vcredist_x86.exe'), '/install /passive', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+    ExtractTemporaryFile('netfx.exe');
+    Exec(ExpandConstant('{tmp}\netfx.exe'), '/q', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
 end;
