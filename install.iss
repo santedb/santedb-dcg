@@ -3,8 +3,8 @@
 
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
-#define MyAppURL "http://santedb.org"
-#define MyAppVersion "2.0.10"
+#define MyAppURL "http://santesuite.org"
+#define MyAppVersion "2.0.13"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -125,8 +125,11 @@ var
   uninstallString : string;
 begin
     EnableFsRedirection(true);
+    WizardForm.PreparingLabel.Visible := True;
+    WizardForm.PreparingLabel.Caption := 'Installing Visual C++ Redistributable';
     ExtractTemporaryFile('vcredist_x86.exe');
     Exec(ExpandConstant('{tmp}\vcredist_x86.exe'), '/install /passive', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
-    ExtractTemporaryFile('netfx.exe');
+    WizardForm.PreparingLabel.Caption := 'Installing Microsoft .NET Framework 4.8';
+     ExtractTemporaryFile('netfx.exe');
     Exec(ExpandConstant('{tmp}\netfx.exe'), '/q', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
 end;
