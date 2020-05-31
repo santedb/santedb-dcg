@@ -4,7 +4,8 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.13"
+#define MyAppVersion "2.0.18"
+#define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -99,6 +100,8 @@ Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: i
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: ".\installsupp\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 Source: ".\installsupp\netfx.exe"; DestDir: "{tmp}"; Flags: dontcopy;
+Source: "{#SanteDBSdkPath}\bin\SignedRelease\sdbk-extract.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SanteDBSdkPath}\bin\SignedRelease\sdbk-extract.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Filename: "http://127.0.0.1:9200"; Name: "{group}\SanteDB\Disconnected Gateway Admin"; IconFilename: "{app}\santedb-dcg.exe"

@@ -72,10 +72,14 @@ namespace SanteDB.Dcg
 
                 DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
                 DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+
+                EventLog.WriteEntry("SanteDB Gateway", $"Gateway is ready to accept connections", EventLogEntryType.Information);
+
             }
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error: {0}", e);
+                EventLog.WriteEntry("SanteDB Gateway", $"Service Startup reported an error: {e}", EventLogEntryType.Error, 1911);
                 Environment.FailFast($"Error starting DCG service: {e.Message}");
             }
         }
@@ -88,10 +92,14 @@ namespace SanteDB.Dcg
             try
             {
                 DcApplicationContext.Current.Stop();
+                EventLog.WriteEntry("SanteDB Gateway", $"Gateway has been shutdown successfully", EventLogEntryType.Information);
+
             }
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error on shutdown: {0}", e);
+                EventLog.WriteEntry("SanteDB Gateway", $"Service Shutdown reported an error: {e}", EventLogEntryType.Error, 1911);
+
                 Environment.FailFast($"Error stopping DCG service: {e.Message}");
 
             }

@@ -246,8 +246,10 @@ namespace SanteDB.Dcg
 #if DEBUG
                 Trace.TraceError("011 899 981 199 911 9725 3!!! {0}", e.ToString());
                 Console.WriteLine("011 899 981 199 911 9725 3!!! {0}", e.ToString());
+
 #else
                 Trace.TraceError("Error encountered: {0}. Will terminate", e.Message);
+                EventLog.WriteEntry("SanteDB Gateway", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
 #endif
                 Environment.Exit(911);
             }
