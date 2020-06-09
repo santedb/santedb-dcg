@@ -20,6 +20,7 @@
 using MohawkCollege.Util.Console.Parameters;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -121,5 +122,20 @@ namespace SanteDB.Dcg
         [Description("Force the loading of DLLs (useful on some Linux distros)")]
         [Parameter("dllForce")]
         public bool Force { get; set; }
+
+        /// <summary>
+        /// Backup file
+        /// </summary>
+        [Parameter("restore")]
+        [Description("Restore from specified backup file")]
+        public String BackupFile { get; set; }
+
+        /// <summary>
+        /// Backup file
+        /// </summary>
+        [Parameter("sysrestore")]
+        [Description("Restore the specified data to the system profile")]
+        public bool SystemRestore { get; set; }
     }
+
 }
