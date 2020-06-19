@@ -84,7 +84,6 @@ namespace SanteDB.Dcg
         /// Reset the service installation
         /// </summary>
         [Description("Resets the configuration of this WWW instance to default")]
-        [Parameter("r")]
         [Parameter("reset")]
         public bool Reset { get; set; }
 
@@ -127,6 +126,7 @@ namespace SanteDB.Dcg
         /// Backup file
         /// </summary>
         [Parameter("restore")]
+        [Parameter("r")]
         [Description("Restore from specified backup file")]
         public String BackupFile { get; set; }
 

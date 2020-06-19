@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.18"
+#define MyAppVersion "2.0.21"
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
@@ -95,6 +95,8 @@ Source: ".\bin\SignedRelease\System.Text.Encoding.CodePages.dll"; DestDir: "{app
 Source: ".\bin\SignedRelease\System.Transactions.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\fr\SanteDB.DisconnectedClient.i18n.resources.dll"; DestDir: "{app}\fr"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\ZXing*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\CoreCompat*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;

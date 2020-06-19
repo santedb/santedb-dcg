@@ -197,38 +197,54 @@ namespace SanteDB.Dcg
                 }
                 else if (!String.IsNullOrEmpty(parms.BackupFile))
                 {
+
                     DcApplicationContext.StartRestore(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Test);
 
                     // Attempt to unpack
                     try
                     {
+                        string serviceName = $"sdb-dcg-{parms.InstanceName}";
+                        if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                            try
+                            {
+                                ServiceTools.ServiceInstaller.StopService(serviceName);
+                            }
+                            catch (Exception e) { Console.Write("Could not stop service: {0}", e.Message); }
+
+                        var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName);
+                        var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName);
+                        if (Directory.Exists(appData)) Directory.Delete(cData, true);
+                        if (Directory.Exists(appData)) Directory.Delete(appData, true);
+
                         var password = PasswordPrompt($"Enter Password for {Path.GetFileNameWithoutExtension(parms.BackupFile)}:");
 
                         var restoreDirectory = DcApplicationContext.Current.GetService<IConfigurationPersister>().ApplicationDataDirectory;
                         if (parms.SystemRestore && Environment.OSVersion.Platform == PlatformID.Win32NT)
                         {
-                            Console.WriteLine("SERIOUS SECURITY WARNING --> IF YOU RESTORE THE SECURITY KEY FOR THIS GATEWAY WILL NOT BE ENCRYPTED. ARE YOU SURE YOU WANT");
-                            Console.WriteLine("                             THIS MEANS AN ATTACKER WHO CAN ACCESS THE CONFIGURATION FILE WILL BE ABLE TO ACCESS THE CENTRAL");
-                            Console.WriteLine("                             SERVER. DO NOT USE THIS OPTION UNLESS CENTRAL POLICY PERMITS IT");
-                            Console.Write("TO CONTINUE TYPE \"I AGREE\":");
-                            if (Console.ReadLine() != "I AGREE")
+                            Console.WriteLine("SERIOUS SECURITY WARNING --> IF YOU RESTORE THIS CONFIGURATION ENSURE THE ORIGINAL MACHINE THAT GENERATED IT DOES NOT CONNECT TO THE");
+                            Console.WriteLine("                             CENTRAL SERVER. ENSURE THE ORIGINAL IS OFFLINE BEFORE PERFORMING THIS PROCEDURE");
+                            Console.Write("TO CONTINUE TYPE \"OK\":");
+                            if (Console.ReadLine() != "OK")
                                 return;
                             restoreDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "config", "systemprofile", "appdata", "local", "santedb", $"dcg-{parms.InstanceName}");
                         }
                         Console.WriteLine("Performing restore to directory {0}...", restoreDirectory);
-
                         new DefaultBackupService().RestoreFiles(parms.BackupFile, password, restoreDirectory);
 
                         // Move the config
-                        if(parms.SystemRestore && Environment.OSVersion.Platform == PlatformID.Win32NT)
+                        if (parms.SystemRestore && Environment.OSVersion.Platform == PlatformID.Win32NT)
                         {
+
                             var configFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "config", "systemprofile", "appdata", "roaming", "santedb", $"dcg-{parms.InstanceName}", "santedb.config");
-                            if (!Directory.Exists(Path.GetDirectoryName(configFile)))
-                                Directory.CreateDirectory(Path.GetDirectoryName(configFile));
-                            using (var fs = File.Create(configFile))
+                            if (!File.Exists(configFile))
                             {
-                                // The SID for this user 
-                                ApplicationServiceContext.Current.GetService<IConfigurationManager>().Configuration.Save(fs);
+                                if (!Directory.Exists(Path.GetDirectoryName(configFile)))
+                                    Directory.CreateDirectory(Path.GetDirectoryName(configFile));
+                                using (var fs = File.Create(configFile))
+                                {
+                                    // The SID for this user 
+                                    ApplicationServiceContext.Current.GetService<IConfigurationManager>().Configuration.Save(fs);
+                                }
                             }
                             // Now copy the source backup to the restore directory
                             Directory.CreateDirectory(Path.Combine(restoreDirectory, "restore"));
@@ -236,8 +252,12 @@ namespace SanteDB.Dcg
 
                             // Restart 
                             Console.WriteLine("Starting SanteDB Service");
-                            Process.Start(typeof(Program).Assembly.Location, "--restart");
-
+                            if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                                try
+                                {
+                                    ServiceTools.ServiceInstaller.StartService(serviceName);
+                                }
+                                catch (Exception e) { Console.Write("Could not stop service: {0}", e.Message); }
                         }
 
                     }
