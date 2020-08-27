@@ -136,6 +136,13 @@ namespace SanteDB.Dcg
         [Parameter("sysrestore")]
         [Description("Restore the specified data to the system profile")]
         public bool SystemRestore { get; set; }
+
+        /// <summary>
+        /// The upgrade directory
+        /// </summary>
+        [Parameter("upgrade")]
+        [Description("Backup the current database and then restore it to another directory")]
+        public bool Upgrade { get; set; }
     }
 
 }

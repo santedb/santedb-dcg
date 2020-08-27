@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.26"
+#define MyAppVersion "2.0.29"
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
@@ -42,8 +42,8 @@ Source: ".\bin\SignedRelease\Antlr3.Runtime.dll"; DestDir: "{app}"; Flags: ignor
 Source: ".\bin\SignedRelease\AtnaApi.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\ExpressionEvaluator.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Jint.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\libeay32md.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\MARC.Everest.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\libcrypto32md.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\spellfix.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\MohawkCollege.Util.Console.Parameters.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Mono.Data.Sqlite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
