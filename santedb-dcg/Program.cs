@@ -145,9 +145,16 @@ namespace SanteDB.Dcg
             try
             {
 
+                // Detect platform
+                if (System.Environment.OSVersion.Platform != PlatformID.Win32NT)
+                    Trace.TraceWarning("Not running on WindowsNT, some features may not function correctly");
+                else if (!EventLog.SourceExists("SanteDB Gateway Process"))
+                    EventLog.CreateEventSource("SanteDB Gateway Process", "santedb-dcg");
+
                 // Security Application Information
                 var applicationIdentity = new SecurityApplication()
                 {
+                    Key = Guid.Parse("feeca9f3-805e-4be9-a5c7-30e6e495939b"),
                     ApplicationSecret = parms.ApplicationSecret ?? "SDB$$DEFAULT$$APPSECRET",
                     Name = parms.ApplicationName ?? "org.santedb.disconnected_client.gateway"
                 };
@@ -358,7 +365,7 @@ namespace SanteDB.Dcg
 
 #else
                 Trace.TraceError("Error encountered: {0}. Will terminate", e.Message);
-                EventLog.WriteEntry("SanteDB Gateway", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
+                EventLog.WriteEntry("SanteDB Gateway Process", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
 #endif
                 Environment.Exit(911);
             }
