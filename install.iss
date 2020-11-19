@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.18"
+#define MyAppVersion "2.0.41"
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
@@ -28,8 +28,9 @@ Compression=bzip
 SolidCompression=yes
 DefaultGroupName={#MyAppName}
 WizardStyle=modern
-;SignedUninstaller=yes
-;SignTool=default
+SignedUninstaller=yes
+SignTool=default sign /a /n $qFyfe Software$q /d $q{#MyAppName}$q $f
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
