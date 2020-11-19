@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.41"
+#define MyAppVersion "2.0.48"
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
@@ -43,8 +43,8 @@ Source: ".\bin\SignedRelease\Antlr3.Runtime.dll"; DestDir: "{app}"; Flags: ignor
 Source: ".\bin\SignedRelease\AtnaApi.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\ExpressionEvaluator.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Jint.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\libeay32md.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\MARC.Everest.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\libcrypto32md.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\spellfix.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\MohawkCollege.Util.Console.Parameters.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Mono.Data.Sqlite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -96,6 +96,8 @@ Source: ".\bin\SignedRelease\System.Text.Encoding.CodePages.dll"; DestDir: "{app
 Source: ".\bin\SignedRelease\System.Transactions.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\fr\SanteDB.DisconnectedClient.i18n.resources.dll"; DestDir: "{app}\fr"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\ZXing*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\CoreCompat*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;

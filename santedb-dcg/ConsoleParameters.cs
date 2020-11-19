@@ -20,6 +20,7 @@
 using MohawkCollege.Util.Console.Parameters;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -83,7 +84,6 @@ namespace SanteDB.Dcg
         /// Reset the service installation
         /// </summary>
         [Description("Resets the configuration of this WWW instance to default")]
-        [Parameter("r")]
         [Parameter("reset")]
         public bool Reset { get; set; }
 
@@ -121,5 +121,28 @@ namespace SanteDB.Dcg
         [Description("Force the loading of DLLs (useful on some Linux distros)")]
         [Parameter("dllForce")]
         public bool Force { get; set; }
+
+        /// <summary>
+        /// Backup file
+        /// </summary>
+        [Parameter("restore")]
+        [Parameter("r")]
+        [Description("Restore from specified backup file")]
+        public String BackupFile { get; set; }
+
+        /// <summary>
+        /// Backup file
+        /// </summary>
+        [Parameter("sysrestore")]
+        [Description("Restore the specified data to the system profile")]
+        public bool SystemRestore { get; set; }
+
+        /// <summary>
+        /// The upgrade directory
+        /// </summary>
+        [Parameter("upgrade")]
+        [Description("Backup the current database and then restore it to another directory")]
+        public bool Upgrade { get; set; }
     }
+
 }
