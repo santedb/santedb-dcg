@@ -4,7 +4,7 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.29"
+#define MyAppVersion "2.0.59"
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 [Setup]
@@ -42,8 +42,9 @@ Source: ".\bin\SignedRelease\Antlr3.Runtime.dll"; DestDir: "{app}"; Flags: ignor
 Source: ".\bin\SignedRelease\AtnaApi.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\ExpressionEvaluator.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Jint.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\libcrypto32md.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\libcrypto-1_1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\spellfix.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\SignedRelease\esprima.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\MohawkCollege.Util.Console.Parameters.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Mono.Data.Sqlite.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\SignedRelease\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
@@ -102,8 +103,6 @@ Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: i
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;
 Source: ".\installsupp\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 Source: ".\installsupp\netfx.exe"; DestDir: "{tmp}"; Flags: dontcopy;
-Source: "{#SanteDBSdkPath}\bin\SignedRelease\sdbk-extract.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#SanteDBSdkPath}\bin\SignedRelease\sdbk-extract.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Filename: "http://127.0.0.1:9200"; Name: "{group}\SanteDB\Disconnected Gateway Admin"; IconFilename: "{app}\santedb-dcg.exe"
