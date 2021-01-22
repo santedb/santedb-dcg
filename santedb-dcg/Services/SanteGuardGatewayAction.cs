@@ -30,6 +30,7 @@ using SanteDB.Core.Services;
 using SanteDB.Core.Security.Services;
 using System.Diagnostics;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Auditing;
 
 namespace SanteDB.Dcg.Services
 {
@@ -69,7 +70,7 @@ namespace SanteDB.Dcg.Services
                     var audit = ((MessageUtil.ParseAuditResult)o).Message.ToAudit().ToAuditData();
                     if (audit != null)
                     {
-                        audit = ApplicationServiceContext.Current.GetService<IAuditRepositoryService>().Insert(audit);
+                        audit = ApplicationServiceContext.Current.GetService<IRepositoryService<AuditData>>().Insert(audit);
                         this.m_tracer.TraceInfo("Stored audit {0}", audit.Key);
                     }
                     else

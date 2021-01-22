@@ -31,7 +31,19 @@ __SanteDBAppService.GetStatus = function () {
 }
 
 __SanteDBAppService.ShowToast = function (string) {
-    console.info("TOAST: " + string);
+    toastr.info(string, "", {
+        "newestOnTop": true,
+        "positionClass": "toast-bottom-center",
+        "preventDuplicates": true,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "1000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    });
 }
 
 __SanteDBAppService.GetOnlineState = function () {
