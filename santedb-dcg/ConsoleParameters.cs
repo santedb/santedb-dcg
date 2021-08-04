@@ -100,7 +100,7 @@ namespace SanteDB.Dcg
         [Description("Sets the secret of the application (for OAUTH) for this instance")]
         [Parameter("appsecret")]
         public String ApplicationSecret { get; set; }
-
+        
         /// <summary>
         /// Start in noninteractive method
         /// </summary>

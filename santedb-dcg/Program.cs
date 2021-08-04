@@ -42,6 +42,7 @@ using SanteDB.DisconnectedClient.Security;
 using SanteDB.DisconnectedClient.Backup;
 using SanteDB.DisconnectedClient.Configuration;
 using SanteDB.Core.Services;
+using System.Diagnostics.Tracing;
 
 namespace SanteDB.Dcg
 {
@@ -276,9 +277,15 @@ namespace SanteDB.Dcg
                 else if (parms.ConsoleMode)
                 {
 #if DEBUG
-                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data", new Dictionary<String, EventLevel>()
+                    {
+                        { "SanteDB", EventLevel.Verbose }
+                    }), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #else
-                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data"), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data", new Dictionary<String, EventLevel>()
+                    {
+                        { "SanteDB", EventLevel.Warning }
+                    }), System.Diagnostics.Tracing.EventLevel.LogAlways);
 #endif
 
                     SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
@@ -290,7 +297,7 @@ namespace SanteDB.Dcg
 
 
                     if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway))
-                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway);
+                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Configuration);
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
                     DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
 
