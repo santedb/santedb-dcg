@@ -17,16 +17,17 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
+using SanteDB.Client.Configuration;
+using SanteDB.Core;
 using SanteDB.Core.Configuration;
-using SanteDB.DisconnectedClient.Configuration;
-using SanteDB.DisconnectedClient.UI;
+using SanteDB.Core.Model.Constants;
+using SanteDB.Messaging.HL7;
 using SanteDB.Messaging.HL7.Configuration;
 using SanteDB.Messaging.HL7.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace SanteDB.Dcg.Configuration
 {
@@ -36,25 +37,44 @@ namespace SanteDB.Dcg.Configuration
     public class Hl7InitialConfigurationProvider : IInitialConfigurationProvider
     {
         /// <summary>
+        /// Get the order of application
+        /// </summary>
+        public int Order => Int32.MaxValue;
+
+        private IHL7MessageHandler CreateHandlerNull(Type handlerType)
+        {
+            var ctor = handlerType.GetConstructors().OrderBy(o => o.GetParameters().Length).First();
+            return ctor.Invoke(ctor.GetParameters().Select(o => (object)null).ToArray()) as IHL7MessageHandler;
+        }
+
+        /// <summary>
         /// Provide initial configuration
         /// </summary>
-        public SanteDBConfiguration Provide(SanteDBConfiguration existing)
+        public SanteDBConfiguration Provide(SanteDBHostType hostType, SanteDBConfiguration configuration)
         {
-            if (!existing.Sections.Any(o => o is SanteDB.Messaging.HL7.Configuration.Hl7ConfigurationSection))
+            if (!configuration.Sections.Any(o => o is SanteDB.Messaging.HL7.Configuration.Hl7ConfigurationSection))
             {
 
-                existing.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Messaging.HL7.HL7MessageHandler)));
-                var adtHandler = new AdtMessageHandler();
-                var qbpHandler = new QbpMessageHandler();
-
-                existing.AddSection(new Hl7ConfigurationSection()
+                configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Messaging.HL7.HL7MessageHandler)));
+                
+                configuration.AddSection(new Hl7ConfigurationSection()
                 {
-                    LocalAuthority = new Core.Model.DataTypes.AssigningAuthority()
+                    LocalAuthority = new Core.Model.DataTypes.IdentityDomain()
                     {
-                        DomainName = "LOCAL_AUTH"
+                        DomainName = "LOCAL_AUTH",
+                        Oid = $"2.25.{BitConverter.ToUInt64(Guid.NewGuid().ToByteArray(), 0)}",
+                        Url = "auth.local"
                     },
-                    Security = AuthenticationMethod.Msh8,
-                    Interceptors = new List<Hl7InterceptorConfigurationElement>(),
+                    Security = Hl7AuthenticationMethod.Msh8,
+                    IdentifierReplacementBehavior = IdentifierReplacementMode.Specific,
+                    BirthplaceClassKeys = new List<Guid>()
+                    {
+                        EntityClassKeys.CityOrTown,
+                        EntityClassKeys.ServiceDeliveryLocation,
+                        EntityClassKeys.PrecinctOrBorough,
+                        EntityClassKeys.Country,
+                        EntityClassKeys.CountyOrParish
+                    },
                     Services = new List<Hl7ServiceDefinition>()
                     {
                         new Hl7ServiceDefinition()
@@ -62,32 +82,22 @@ namespace SanteDB.Dcg.Configuration
                             AddressXml = "llp://127.0.0.1:12100",
                             Name = "Default Endpoint",
                             ReceiveTimeout = 30000,
-                            Handlers = new List<HandlerDefinition>()
-                            {
-                                new HandlerDefinition()
+                            MessageHandlers = AppDomain.CurrentDomain.GetAllTypes().Where(o=>typeof(IHL7MessageHandler).IsAssignableFrom(o) && !o.IsAbstract && !o.IsInterface).Select(o=>this.CreateHandlerNull(o)).Select(hdlr => new HandlerDefinition()
                                 {
-                                    Handler = adtHandler,
-                                    Types = adtHandler.SupportedTriggers.Select(o=>new MessageDefinition()
+                                    Handler = hdlr,
+                                    Types = hdlr.SupportedTriggers.Select(o=>new MessageDefinition()
                                     {
                                         IsQuery = false,
                                         Name = o
                                     }).ToList()
-                                },
-                                new HandlerDefinition()
-                                {
-                                    Handler = qbpHandler,
-                                    Types = qbpHandler.SupportedTriggers.Select(o=>new MessageDefinition()
-                                    {
-                                        IsQuery = true,
-                                        Name = o
-                                    }).ToList()
-                                }
-                            }
+                                }).ToList(),
                         }
-                    }
+                    },
+                    StrictAssigningAuthorities = true,
+                    StrictMetadataMatch = true
                 });
             }
-            return existing;
+            return configuration;
 
         }
     }

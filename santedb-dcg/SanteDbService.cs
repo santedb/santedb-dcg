@@ -18,7 +18,6 @@
  * Date: 2019-8-8
  */
 using SanteDB.Core.Model.Security;
-using SanteDB.DisconnectedClient.UI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,22 +28,24 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading.Tasks;
 using SanteDB.Core.Configuration;
+using SanteDB.Core;
 
 namespace SanteDB.Dcg
 {
     public partial class SanteDbService : ServiceBase
     {
-        // THe application identity
-        private SecurityApplication m_applicationIdentity;
+        private bool m_serviceStop = false;
+
+        private readonly IApplicationServiceContext m_applicationServiceContext;
 
         /// <summary>
         /// SanteDB Service
         /// </summary>
-        public SanteDbService(string instanceName, SecurityApplication applicationIdentity)
+        public SanteDbService(string instanceName, IApplicationServiceContext applicationServiceContext)
         {
             InitializeComponent();
-            this.m_applicationIdentity = applicationIdentity;
-            this.ServiceName = instanceName;
+            this.m_applicationServiceContext = applicationServiceContext;
+            this.ServiceName = $"SanteDB Gateway {instanceName}";
         }
 
         /// <summary>
@@ -55,33 +56,13 @@ namespace SanteDB.Dcg
         {
             try
             {
-                
-                SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
-                {
-                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
-                };
-
-
-                SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
-                {
-                    Trace.TraceInformation(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
-                };
-
-                if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity, Core.SanteDBHostType.Gateway))
-                    DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{this.ServiceName}", this.m_applicationIdentity, Core.SanteDBHostType.Gateway);
-
-
-                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
-                DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
-
-                EventLog.WriteEntry("SanteDB Gateway Process", $"Gateway is ready to accept connections", EventLogEntryType.Information);
-
+                ServiceUtil.Start(Guid.NewGuid(), this.m_applicationServiceContext);
             }
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error: {0}", e);
-                EventLog.WriteEntry("SanteDB Gateway Process", $"Service Startup reported an error: {e}", EventLogEntryType.Error, 1911);
-                Environment.FailFast($"Error starting DCG service: {e.Message}");
+                EventLog.WriteEntry("SanteDB Portal Process", $"Service Startup reported an error: {e}", EventLogEntryType.Error, 1911);
+                Environment.FailFast($"Error starting WWW service: {e.Message}");
             }
         }
 
@@ -92,17 +73,15 @@ namespace SanteDB.Dcg
         {
             try
             {
-                DcApplicationContext.Current.Stop();
-                EventLog.WriteEntry("SanteDB Gateway Process", $"Gateway has been shutdown successfully", EventLogEntryType.Information);
-
+                Trace.TraceInformation("Stopping Service");
+                this.m_serviceStop = true;
+                ServiceUtil.Stop();
             }
             catch (Exception e)
             {
-                Trace.TraceError("The service reported an error on shutdown: {0}", e);
-                EventLog.WriteEntry("SanteDB Gateway Process", $"Service Shutdown reported an error: {e}", EventLogEntryType.Error, 1911);
-
-                Environment.FailFast($"Error stopping DCG service: {e.Message}");
-
+                EventLog.WriteEntry("SanteDB Portal Process", $"Service Shutdown reported an error: {e}", EventLogEntryType.Error, 1911);
+                Trace.TraceError("The service reported an error: {0}", e);
+                Environment.FailFast($"Error stopping WWW service: {e.Message}");
             }
         }
     }

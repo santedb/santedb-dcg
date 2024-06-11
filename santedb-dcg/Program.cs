@@ -20,7 +20,6 @@
 using MohawkCollege.Util.Console.Parameters;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Model.Security;
-using SanteDB.DisconnectedClient.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -38,11 +37,16 @@ using SanteDB.Core.Configuration;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Services.Impl;
-using SanteDB.DisconnectedClient.Security;
-using SanteDB.DisconnectedClient.Backup;
-using SanteDB.DisconnectedClient.Configuration;
 using SanteDB.Core.Services;
 using System.Diagnostics.Tracing;
+using SanteDB.Client.Rest;
+using SanteDB.Core.Data.Backup;
+using Mono.Unix.Native;
+using Mono.Unix;
+using SanteDB.Core.Diagnostics.Tracing;
+using SanteDB.Client.Batteries;
+using SanteDB.Client.Configuration.Upstream;
+using SanteDB.Client.Configuration;
 
 namespace SanteDB.Dcg
 {
@@ -110,26 +114,24 @@ namespace SanteDB.Dcg
             Console.WriteLine("Complete Copyright information available at http://github.com/santedb/santedb-www");
 
             // Parameters to force load?
+            var dllFiles = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Sante*.dll");
             if (parms.Force)
-                foreach (var itm in Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "*.dll"))
-                {
-                    try
-                    {
-                        var asm = Assembly.LoadFile(itm);
-                        Console.WriteLine("Force Loaded {0}", asm.FullName);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine("ERR: Cannot load {0} due to {1}", itm, e.Message);
-                    }
-                }
-
-            Console.CancelKeyPress += (o, e) =>
             {
-                m_quitEvent.Set();
-                e.Cancel = true;
-            };
+                dllFiles = dllFiles.Union(Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "*.dll")).ToArray();
+            }
 
+            foreach (var itm in dllFiles)
+            {
+                try
+                {
+                    var asm = Assembly.LoadFile(itm);
+                    Console.WriteLine("Force Loaded {0}", asm.FullName);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("ERR: Cannot load {0} due to {1}", itm, e.Message);
+                }
+            }
 
             AppDomain.CurrentDomain.AssemblyResolve += (o, e) =>
             {
@@ -149,33 +151,10 @@ namespace SanteDB.Dcg
                 // Detect platform
                 if (System.Environment.OSVersion.Platform != PlatformID.Win32NT)
                     Trace.TraceWarning("Not running on WindowsNT, some features may not function correctly");
-                else if (!EventLog.SourceExists("SanteDB Gateway Process"))
-                    EventLog.CreateEventSource("SanteDB Gateway Process", "santedb-dcg");
+                else if (!EventLog.SourceExists("SanteDB"))
+                    EventLog.CreateEventSource("SanteDB", "santedb-dcg");
 
-                // Security Application Information
-                var applicationIdentity = new SecurityApplication()
-                {
-                    Key = Guid.Parse("feeca9f3-805e-4be9-a5c7-30e6e495939b"),
-                    ApplicationSecret = parms.ApplicationSecret ?? "SDB$$DEFAULT$$APPSECRET",
-                    Name = parms.ApplicationName ?? "org.santedb.disconnected_client.gateway"
-                };
 
-                // Setup basic parameters
-                String[] directory = {
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName),
-                    Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName)
-                };
-
-                foreach (var dir in directory)
-                    if (!Directory.Exists(dir))
-                        Directory.CreateDirectory(dir);
-
-                // Token validator
-                TokenValidationManager.SymmetricKeyValidationCallback += (o, k, i) =>
-                {
-                    Trace.TraceError("Trust issuer {0} failed", i);
-                    return false;
-                };
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, error) =>
                 {
                     if (certificate == null || chain == null)
@@ -191,6 +170,14 @@ namespace SanteDB.Dcg
                     }
                 };
 
+                // Different binding port?
+                if (String.IsNullOrEmpty(parms.BaseUrl))
+                {
+                    parms.BaseUrl = "http://127.0.0.1:9200";
+                }
+
+                AppDomain.CurrentDomain.SetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA, parms.BaseUrl);
+
 
                 if (parms.ShowHelp)
                     parser.WriteHelp(Console.Out);
@@ -203,103 +190,18 @@ namespace SanteDB.Dcg
                     Console.WriteLine("Environment Reset Successful");
                     return;
                 }
-                else if (!String.IsNullOrEmpty(parms.BackupFile))
-                {
-
-                    DcApplicationContext.StartRestore(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Test);
-
-                    // Attempt to unpack
-                    try
-                    {
-                        string serviceName = $"sdb-dcg-{parms.InstanceName}";
-                        if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
-                            try
-                            {
-                                ServiceTools.ServiceInstaller.StopService(serviceName);
-                            }
-                            catch (Exception e) { Console.Write("Could not stop service: {0}", e.Message); }
-
-                        var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName);
-                        var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName);
-                        if (Directory.Exists(appData)) Directory.Delete(cData, true);
-                        if (Directory.Exists(appData)) Directory.Delete(appData, true);
-
-                        var password = PasswordPrompt($"Enter Password for {Path.GetFileNameWithoutExtension(parms.BackupFile)}:");
-
-                        var restoreDirectory = DcApplicationContext.Current.GetService<IConfigurationPersister>().ApplicationDataDirectory;
-                        if (parms.SystemRestore && Environment.OSVersion.Platform == PlatformID.Win32NT)
-                        {
-                            Console.WriteLine("SERIOUS SECURITY WARNING --> IF YOU RESTORE THIS CONFIGURATION ENSURE THE ORIGINAL MACHINE THAT GENERATED IT DOES NOT CONNECT TO THE");
-                            Console.WriteLine("                             CENTRAL SERVER. ENSURE THE ORIGINAL IS OFFLINE BEFORE PERFORMING THIS PROCEDURE");
-                            Console.Write("TO CONTINUE TYPE \"OK\":");
-                            if (Console.ReadLine() != "OK")
-                                return;
-                            restoreDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "config", "systemprofile", "appdata", "local", "santedb", $"dcg-{parms.InstanceName}");
-                        }
-                        Console.WriteLine("Performing restore to directory {0}...", restoreDirectory);
-                        new DefaultBackupService().RestoreFiles(parms.BackupFile, password, restoreDirectory);
-
-                        // Move the config
-                        if (parms.SystemRestore && Environment.OSVersion.Platform == PlatformID.Win32NT)
-                        {
-
-                            var configFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.SystemX86), "config", "systemprofile", "appdata", "roaming", "santedb", $"dcg-{parms.InstanceName}", "santedb.config");
-                            if (!File.Exists(configFile))
-                            {
-                                if (!Directory.Exists(Path.GetDirectoryName(configFile)))
-                                    Directory.CreateDirectory(Path.GetDirectoryName(configFile));
-                                using (var fs = File.Create(configFile))
-                                {
-                                    // The SID for this user 
-                                    ApplicationServiceContext.Current.GetService<IConfigurationManager>().Configuration.Save(fs);
-                                }
-                            }
-                            // Now copy the source backup to the restore directory
-                            Directory.CreateDirectory(Path.Combine(restoreDirectory, "restore"));
-                            File.Copy(parms.BackupFile, Path.Combine(restoreDirectory, "restore", Path.GetFileName(parms.BackupFile)));
-
-                            // Restart 
-                            Console.WriteLine("Starting SanteDB Service");
-                            if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
-                                try
-                                {
-                                    ServiceTools.ServiceInstaller.StartService(serviceName);
-                                }
-                                catch (Exception e) { Console.Write("Could not stop service: {0}", e.Message); }
-                        }
-
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine($"Error restoring {Path.GetFileNameWithoutExtension(parms.BackupFile)} - {e}");
-                    }
-                }
                 else if (parms.ConsoleMode)
                 {
 #if DEBUG
-                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data", new Dictionary<String, EventLevel>()
-                    {
-                        { "SanteDB", EventLevel.Verbose }
-                    }), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Informational, "SanteDB.Data", new Dictionary<String, EventLevel>()), EventLevel.Informational);
 #else
-                    Tracer.AddWriter(new DisconnectedClient.Diagnostics.LogTraceWriter(System.Diagnostics.Tracing.EventLevel.LogAlways, "SanteDB.data", new Dictionary<String, EventLevel>()
-                    {
-                        { "SanteDB", EventLevel.Warning }
-                    }), System.Diagnostics.Tracing.EventLevel.LogAlways);
+                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Warning, "SanteDB.Data", new Dictionary<String, EventLevel>()), EventLevel.Warning);
 #endif
+                    Trace.Listeners.Add(new ConsoleTraceListener());
 
-                    SanteDB.DisconnectedClient.ApplicationContext.ProgressChanged += (o, e) =>
-                    {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.WriteLine(">>> PROGRESS >>> {0} : {1:#0%}", e.ProgressText, e.Progress);
-                        Console.ResetColor();
-                    };
+                    var context = CreateContext(parms);
 
-
-                    if (!DcApplicationContext.StartContext(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Gateway))
-                        DcApplicationContext.StartTemporary(new ConsoleDialogProvider(), $"dcg-{parms.InstanceName}", applicationIdentity, SanteDBHostType.Configuration);
-                    DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.RemoveAll(o => o.Key == "http.bypassMagic");
-                    DcApplicationContext.Current.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AppSettings.Add(new AppSettingKeyValuePair() { Key = "http.bypassMagic", Value = DcApplicationContext.Current.ExecutionUuid.ToString() });
+                    ServiceUtil.Start(Guid.NewGuid(), context);
 
                     if (!parms.Forever)
                     {
@@ -307,13 +209,47 @@ namespace SanteDB.Dcg
                         Console.ReadLine();
                     }
                     else
-                        m_quitEvent.WaitOne();
-                    DcApplicationContext.Current.Stop();
-                }
+                    {
+                        Console.WriteLine("Will run in nohup daemon mode...");
+                        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                        {
+                            // Wait until cancel key is pressed
+                            var mre = new ManualResetEventSlim(false);
+                            // Application requested a restart
+                            ApplicationServiceContext.Current.Stopped += (o, e) => mre.Set();
+                            // User requested a stop
+                            Console.CancelKeyPress += (o, e) => mre.Set();
+                            mre.Wait();
+                        }
+                        else
+                        {  // running on unix
+                           // Now wait until the service is exiting va SIGTERM or SIGSTOP
+                            UnixSignal[] signals = new UnixSignal[]
+                            {
+                                new UnixSignal(Mono.Unix.Native.Signum.SIGINT),
+                                new UnixSignal(Mono.Unix.Native.Signum.SIGTERM),
+                                new UnixSignal(Mono.Unix.Native.Signum.SIGQUIT),
+                                new UnixSignal(Mono.Unix.Native.Signum.SIGHUP)
+                            };
 
+                            ApplicationServiceContext.Current.Stopped += (o, e) =>
+                            {
+                                Console.WriteLine("Service has stopped, will send SIGHUP to self for restart");
+                                Syscall.kill(Syscall.getpid(), Signum.SIGHUP);
+                            };
+
+                            Console.WriteLine("Started - Send SIGINT, SIGTERM, SIGQUIT or SIGHUP to PID {0} to terminate", Process.GetCurrentProcess().Id);
+                            int signal = UnixSignal.WaitAny(signals);
+                        }
+                    }
+
+                    Console.WriteLine($"Received termination signal...");
+                    ServiceUtil.Stop();
+
+                }
                 else if (parms.Install)
                 {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
+                    string serviceName = $"sdb-www-{parms.InstanceName}";
                     if (!ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
                         String argList = String.Empty;
@@ -323,45 +259,56 @@ namespace SanteDB.Dcg
                             argList += $" --appsecret=\"{parms.ApplicationSecret}\"";
 
                         ServiceTools.ServiceInstaller.Install(
-                            serviceName, $"SanteDB DCG ({parms.InstanceName})",
+                            serviceName, $"SanteDB WWW ({parms.InstanceName})",
                             $"{entryAsm.Location} --name=\"{parms.InstanceName}\" {argList}",
                             null, null, ServiceTools.ServiceBootFlag.AutoStart);
                     }
                     else
                         throw new InvalidOperationException("Service instance already installed");
                 }
-                else if (parms.Restart)
-                {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
-                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
-                    {
-                        try
-                        {
-                            ServiceTools.ServiceInstaller.StopService(serviceName);
-                        }
-                        catch (Exception e) { Console.Write("Could not start service: {0}", e.Message); }
-                        try { ServiceTools.ServiceInstaller.StartService(serviceName); }
-                        catch (Exception e) { Console.Write("Could not start service: {0}", e.Message); }
-                    }
-                    else
-                        throw new InvalidOperationException("Service instance not installed");
-                }
                 else if (parms.Uninstall)
                 {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
+                    string serviceName = $"sdb-www-{parms.InstanceName}";
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                         ServiceTools.ServiceInstaller.Uninstall(serviceName);
                     else
                         throw new InvalidOperationException("Service instance not installed");
                 }
+                else if (parms.Restart)
+                {
+                    string serviceName = $"sdb-www-{parms.InstanceName}";
+                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                    {
+                        Console.Write("Stopping {0}...", serviceName);
+                        var niter = 0;
+                        ServiceTools.ServiceInstaller.StopService(serviceName);
+                        while (ServiceTools.ServiceInstaller.GetServiceStatus(serviceName) != ServiceTools.ServiceState.Stop && niter < 10)
+                        {
+                            Thread.Sleep(1000);
+                            Console.Write(".");
+                            niter++;
+                        }
+                        Console.Write("\r\nStarting {0}...", serviceName);
+                        ServiceTools.ServiceInstaller.StartService(serviceName);
+                        while (ServiceTools.ServiceInstaller.GetServiceStatus(serviceName) != ServiceTools.ServiceState.Run && niter < 20)
+                        {
+                            Thread.Sleep(1000);
+                            Console.Write(".");
+                            niter++;
+                        }
+                        Console.WriteLine("Restart Complete");
+                    }
+                }
                 else
                 {
+                    Trace.TraceInformation("Starting as Windows Service");
                     ServiceBase[] ServicesToRun;
                     ServicesToRun = new ServiceBase[]
                     {
-                        new SanteDbService(parms.InstanceName, applicationIdentity)
+                        new SanteDbService(parms.InstanceName, CreateContext(parms))
                     };
                     ServiceBase.Run(ServicesToRun);
+                    Trace.TraceInformation("Started As Windows Service...");
                 }
             }
             catch (Exception e)
@@ -376,6 +323,61 @@ namespace SanteDB.Dcg
 #endif
                 Environment.Exit(911);
             }
+        }
+
+
+        /// <summary>
+        /// Create context
+        /// </summary>
+        private static IApplicationServiceContext CreateContext(ConsoleParameters parms)
+        {
+            ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount;
+
+            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "santedb", "dcg", parms.InstanceName);
+            // Does the config or data directory point to WinDir
+            if (configDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)))
+            {
+                configDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName);
+            }
+            var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "santedb", "dcg", parms.InstanceName);
+            if (dataDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)))
+            {
+                dataDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName);
+            }
+
+            if (!Directory.Exists(dataDirectory))
+            {
+                Directory.CreateDirectory(dataDirectory);
+            }
+            if (!Directory.Exists(configDirectory))
+            {
+                Directory.CreateDirectory(configDirectory);
+            }
+
+            // Security Application Information
+            var applicationIdentity = new UpstreamCredentialConfiguration()
+            {
+                Conveyance = UpstreamCredentialConveyance.Secret,
+                CredentialName = parms.ApplicationName ?? "org.santedb.disconnected_client.gateway",
+                CredentialSecret = parms.ApplicationSecret ?? "SDB$$DEFAULT$$APPSECRET",
+                CredentialType = UpstreamCredentialType.Application
+            };
+
+            ClientBatteries.Initialize(dataDirectory, configDirectory, applicationIdentity);
+            // Establish a configuration environment 
+            IConfigurationManager configurationManager = null;
+            var configurationFile = Path.Combine(configDirectory, "santedb.config");
+            if (File.Exists(configurationFile))
+            {
+                configurationManager = new FileConfigurationService(configurationFile, true);
+            }
+            else
+            {
+                configurationManager = new InitialConfigurationManager(SanteDBHostType.Gateway, parms.InstanceName, configurationFile);
+            }
+
+
+            return new GatewayApplicationContext(parms, configurationManager);
         }
     }
 }

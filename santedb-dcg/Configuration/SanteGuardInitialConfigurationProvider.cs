@@ -17,11 +17,11 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
+using SanteDB.Client.Configuration;
+using SanteDB.Core;
 using SanteDB.Core.Configuration;
-using SanteDB.Dcg.Services;
-using SanteDB.DisconnectedClient.Configuration;
-using SanteDB.DisconnectedClient.UI;
-using SanteGuard.Configuration;
+using SanteGuard.Messaging.Syslog.Action;
+using SanteGuard.Messaging.Syslog.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,10 +35,10 @@ namespace SanteDB.Dcg.Configuration
     /// </summary>
     public class SanteGuardInitialConfigurationProvider : IInitialConfigurationProvider
     {
+        /// <inheritdoc/>
+        public int Order => Int32.MaxValue;
 
-        /// <summary>
-        /// Provide initial configuration
-        /// </summary>
+        /// <inheritdoc/>
         public SanteDBConfiguration Provide(SanteDBConfiguration existing)
         {
             if (existing.GetSection<SanteGuardConfiguration>() == null)
@@ -57,10 +57,10 @@ namespace SanteDB.Dcg.Configuration
                             MaxSize = ushort.MaxValue,
                             ReadTimeout = new TimeSpan(0, 0, 15),
                             Timeout = new TimeSpan(0,0,15),
-                            ActionXml = new List<string>()
+                            Action = new List<TypeReferenceConfiguration>()
                             {
-                                typeof(SanteGuardGatewayAction).AssemblyQualifiedName,
-                                typeof(SanteGuard.Messaging.Syslog.Action.LogAction).AssemblyQualifiedName
+                                new TypeReferenceConfiguration(typeof(StorageAction)),
+                                new TypeReferenceConfiguration(typeof(LogAction))
                             },
                             LogFileLocation ="messages.txt"
                         }
@@ -69,6 +69,11 @@ namespace SanteDB.Dcg.Configuration
             }
 
             return existing;
+        }
+
+        public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration configuration)
+        {
+            throw new NotImplementedException();
         }
     }
 }

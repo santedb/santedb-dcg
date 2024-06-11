@@ -74,16 +74,10 @@ namespace SanteDB.Dcg
         public bool Uninstall { get; set; }
 
         /// <summary>
-        /// Restarts the service
-        /// </summary>
-        [Description("Restart the specified service")]
-        [Parameter("restart")]
-        public bool Restart { get; set; }
-
-        /// <summary>
         /// Reset the service installation
         /// </summary>
         [Description("Resets the configuration of this WWW instance to default")]
+        [Parameter("r")]
         [Parameter("reset")]
         public bool Reset { get; set; }
 
@@ -100,20 +94,13 @@ namespace SanteDB.Dcg
         [Description("Sets the secret of the application (for OAUTH) for this instance")]
         [Parameter("appsecret")]
         public String ApplicationSecret { get; set; }
-        
+
         /// <summary>
         /// Start in noninteractive method
         /// </summary>
         [Description("Do not quit when the ENTER key is pressed")]
         [Parameter("daemon")]
         public bool Forever { get; internal set; }
-
-        /// <summary>
-        /// Use an initial configuration skeleton
-        /// </summary>
-        [Description("Use an initial configuration skeleton for this deployment")]
-        [Parameter("skel")]
-        public string Skel { get; set; }
 
         /// <summary>
         /// Force loading of DLLs
@@ -123,26 +110,54 @@ namespace SanteDB.Dcg
         public bool Force { get; set; }
 
         /// <summary>
-        /// Backup file
+        /// Restart the specifie instance
         /// </summary>
-        [Parameter("restore")]
-        [Parameter("r")]
-        [Description("Restore from specified backup file")]
-        public String BackupFile { get; set; }
+        [Description("Restart the running service control")]
+        [Parameter("restart")]
+        public bool Restart { get; internal set; }
+        
+        /// <summary>
+        /// Base URL
+        /// </summary>
+        [Parameter("base")]
+        [Description("Allows for the changing of the base URL (default is http://127.0.0.1)")]
+        public string BaseUrl { get; set; }
 
         /// <summary>
-        /// Backup file
+        /// Convert this object back to an argument list
         /// </summary>
-        [Parameter("sysrestore")]
-        [Description("Restore the specified data to the system profile")]
-        public bool SystemRestore { get; set; }
+        internal IEnumerable<String> ToArgumentList()
+        {
+            if (!String.IsNullOrEmpty(this.InstanceName))
+            {
+                yield return $"--name=\"{this.InstanceName}\"";
+            }
+            if (this.Force)
+            {
+                yield return "--force";
+            }
+            if (this.ConsoleMode)
+            {
+                yield return "--console";
+            }
+            if (this.Forever)
+            {
+                yield return "--daemon";
+            }
+            if (!String.IsNullOrEmpty(this.BaseUrl))
+            {
+                yield return $"--base=\"{this.BaseUrl}\"";
+            }
+            if (!String.IsNullOrEmpty(this.ApplicationName))
+            {
+                yield return $"--appname=\"{this.ApplicationName}\"";
+            }
+            if (!String.IsNullOrEmpty(this.ApplicationSecret))
+            {
+                yield return $"--appsecret=\"{this.ApplicationSecret}\"";
+            }
 
-        /// <summary>
-        /// The upgrade directory
-        /// </summary>
-        [Parameter("upgrade")]
-        [Description("Backup the current database and then restore it to another directory")]
-        public bool Upgrade { get; set; }
+        }
     }
 
 }
