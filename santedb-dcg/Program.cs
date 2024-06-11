@@ -334,16 +334,17 @@ namespace SanteDB.Dcg
             ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount;
 
             var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "santedb", "dcg", parms.InstanceName);
-            // Does the config or data directory point to WinDir
+            var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "santedb", "dcg", parms.InstanceName);
+
+            // Running as system?
             if (configDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)))
             {
-                configDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName);
+                configDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "config");
+                dataDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "data");
             }
-            var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "santedb", "dcg", parms.InstanceName);
-            if (dataDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)))
-            {
-                dataDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName);
-            }
+
+            Trace.TraceInformation("Configuration Directory: {0}", configDirectory);
+            Trace.TraceInformation("Data Directory: {0}", dataDirectory);
 
             if (!Directory.Exists(dataDirectory))
             {
