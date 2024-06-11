@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("santedb-dcg")]
-[assembly: AssemblyCopyright("Copyright (C) 2018 - 2020, Fyfe Software Inc.")]
+[assembly: AssemblyCopyright("Copyright (C) 2020-2024 SanteSuite Contributors (see NOTICE)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -40,17 +40,4 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("c56c5f24-211d-4c33-ba33-fba4e0c97df5")]
-
-// Version information for an assembly consists of the following four values:
-//
-//      Major Version
-//      Minor Version
-//      Build Number
-//      Revision
-//
-// You can specify all the values or you can default the Build and Revision Numbers
-// by using the '*' as shown below:
-// [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.1.48.*")]
-[assembly: AssemblyFileVersion("2.1.48.0")]
-[assembly: AssemblyInformationalVersion("Ottawa")]
+[assembly: AssemblyInformationalVersion("Alberta")]

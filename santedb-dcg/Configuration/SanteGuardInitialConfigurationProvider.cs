@@ -39,7 +39,7 @@ namespace SanteDB.Dcg.Configuration
         public int Order => Int32.MaxValue;
 
         /// <inheritdoc/>
-        public SanteDBConfiguration Provide(SanteDBConfiguration existing)
+        public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration existing)
         {
             if (existing.GetSection<SanteGuardConfiguration>() == null)
             {
@@ -71,9 +71,5 @@ namespace SanteDB.Dcg.Configuration
             return existing;
         }
 
-        public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration configuration)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

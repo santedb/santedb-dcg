@@ -1,6 +1,6 @@
 ﻿/*
  * Portions Copyright 2015-2019 Mohawk College of Applied Arts and Technology
- * Portions Copyright 2019-2019 SanteSuite Contributors (See NOTICE)
+ * Portions Copyright 2019-2023 SanteSuite Contributors (See NOTICE)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you 
  * may not use this file except in compliance with the License. You may 
@@ -376,6 +376,10 @@ namespace SanteDB.Dcg
                 configurationManager = new InitialConfigurationManager(SanteDBHostType.Gateway, parms.InstanceName, configurationFile);
             }
 
+#if DEBUG
+            // TODO: Git Submodules would eliminate this
+            configurationManager.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AllowUnsignedAssemblies = true;
+#endif
 
             return new GatewayApplicationContext(parms, configurationManager);
         }

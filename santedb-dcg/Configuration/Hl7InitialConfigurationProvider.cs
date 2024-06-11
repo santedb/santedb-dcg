@@ -81,16 +81,7 @@ namespace SanteDB.Dcg.Configuration
                         {
                             AddressXml = "llp://127.0.0.1:12100",
                             Name = "Default Endpoint",
-                            ReceiveTimeout = 30000,
-                            MessageHandlers = AppDomain.CurrentDomain.GetAllTypes().Where(o=>typeof(IHL7MessageHandler).IsAssignableFrom(o) && !o.IsAbstract && !o.IsInterface).Select(o=>this.CreateHandlerNull(o)).Select(hdlr => new HandlerDefinition()
-                                {
-                                    Handler = hdlr,
-                                    Types = hdlr.SupportedTriggers.Select(o=>new MessageDefinition()
-                                    {
-                                        IsQuery = false,
-                                        Name = o
-                                    }).ToList()
-                                }).ToList(),
+                            ReceiveTimeout = 30000
                         }
                     },
                     StrictAssigningAuthorities = true,
