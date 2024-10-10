@@ -4,8 +4,18 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
-#define MyAppVersion "2.0.71"
+#define MyAppVersion "3.0"
 #define SanteDBSdkPath "..\santedb-sdk"      
+
+
+#ifndef SignKey
+#define SignKey "8185304d2f840a371d72a21d8780541bf9f0b5d2"
+#endif 
+
+#ifndef SignOpts
+#define SignOpts ""
+#endif 
+
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -29,7 +39,7 @@ SolidCompression=yes
 DefaultGroupName={#MyAppName}
 WizardStyle=modern
 SignedUninstaller=yes
-SignTool=default sign /a /n $qFyfe Software$q /d $q{#MyAppName}$q $f
+SignTool=default /sha1 {#SignKey} {#SignOpts} /d $qSanteDB dCDR Gateway Server$q $f
 
 
 [Languages]
@@ -39,70 +49,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: ".\bin\SignedRelease\Antlr3.Runtime.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\AtnaApi.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\ExpressionEvaluator.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\Jint.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\libcrypto-1_1.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\spellfix.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\esprima.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\MohawkCollege.Util.Console.Parameters.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\Mono.Data.Sqlite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\Newtonsoft.Json.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\NHapi.Base.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\NHapi.Model.V25.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\RestSrvr.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.BI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.BusinessRules.JavaScript.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Cdss.Xml.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Configuration.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Api.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Applets.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Model.AMI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Model.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Model.RISI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Core.Model.ViewModelSerializers.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.Ags.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.i18n.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.DisconnectedClient.UI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Messaging.AMI.Client.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Messaging.HDSI.Client.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Messaging.HL7.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.OrmLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Rest.AMI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Rest.BIS.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Rest.Common.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteDB.Rest.HDSI.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteGuard.Core.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SanteGuard.Messaging.Syslog.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SharpCompress.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SqlCipher.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SQLite.Net.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\SQLite.Net.Platform.*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Net.IPNetwork.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Buffers.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Data.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Diagnostics.PerformanceCounter.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Memory.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Numerics.Vectors.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Security.AccessControl.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Security.Permissions.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Security.Principal.Windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Text.Encoding.CodePages.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\System.Transactions.Portable.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\fr\SanteDB.DisconnectedClient.i18n.resources.dll"; DestDir: "{app}\fr"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\ZXing*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\CoreCompat*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: ".\bin\SignedRelease\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\Release\runtimes\*"; DestDir: "{app}\runtimes"; Flags: recursesubdirs ignoreversion
+Source: ".\bin\Release\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
+Source: ".\bin\Release\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\bin\Release\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;
-Source: ".\installsupp\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: dontcopy;
+Source: ".\installsupp\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 Source: ".\installsupp\netfx.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 
 [Icons]
@@ -132,8 +85,8 @@ begin
     EnableFsRedirection(true);
     WizardForm.PreparingLabel.Visible := True;
     WizardForm.PreparingLabel.Caption := 'Installing Visual C++ Redistributable';
-    ExtractTemporaryFile('vcredist_x86.exe');
-    Exec(ExpandConstant('{tmp}\vcredist_x86.exe'), '/install /passive', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
+    ExtractTemporaryFile('VC_redist.x64.exe');
+    Exec(ExpandConstant('{tmp}\VC_redist.x64.exe'), '/install /passive', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);
     WizardForm.PreparingLabel.Caption := 'Installing Microsoft .NET Framework 4.8';
      ExtractTemporaryFile('netfx.exe');
     Exec(ExpandConstant('{tmp}\netfx.exe'), '/q', '', SW_SHOW, ewWaitUntilTerminated, ResultCode);

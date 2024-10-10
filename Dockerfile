@@ -8,4 +8,4 @@ COPY ./bin/Release/ /santedb/
 # RUN rm -rf /santedb/Data
 WORKDIR /santedb
 EXPOSE 9200/tcp
-CMD [ "mono", "/santedb/santedb-www.exe", "--dllForce", "--console","--daemon" ]
+CMD [ "mono", "/santedb/santedb-dcg.exe", "--dllForce", "--console","--daemon" ]
