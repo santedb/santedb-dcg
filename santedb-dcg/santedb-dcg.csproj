@@ -88,6 +88,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\FhirInitialConfigurationProvider.cs" />
     <Compile Include="Configuration\GatewayInitialConfigurationProvider.cs" />
     <Compile Include="Configuration\Hl7InitialConfigurationProvider.cs" />
     <Compile Include="Configuration\SanteGuardInitialConfigurationProvider.cs" />

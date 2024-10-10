@@ -43,8 +43,7 @@ namespace SanteDB.Dcg.Configuration
 
         private IHL7MessageHandler CreateHandlerNull(Type handlerType)
         {
-            var ctor = handlerType.GetConstructors().OrderBy(o => o.GetParameters().Length).First();
-            return ctor.Invoke(ctor.GetParameters().Select(o => (object)null).ToArray()) as IHL7MessageHandler;
+            return handlerType.CreateInjected() as IHL7MessageHandler;
         }
 
         /// <summary>
@@ -56,7 +55,7 @@ namespace SanteDB.Dcg.Configuration
             {
 
                 configuration.GetSection<ApplicationServiceContextConfigurationSection>().ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Messaging.HL7.HL7MessageHandler)));
-                
+
                 configuration.AddSection(new Hl7ConfigurationSection()
                 {
                     LocalAuthority = new Core.Model.DataTypes.IdentityDomain()
@@ -64,6 +63,15 @@ namespace SanteDB.Dcg.Configuration
                         DomainName = "LOCAL_AUTH",
                         Oid = $"2.25.{BitConverter.ToUInt64(Guid.NewGuid().ToByteArray(), 0)}",
                         Url = "auth.local"
+                    },
+                    LocalFacility = Guid.Empty,
+                    RequireAuthenticatedApplication = true,
+                    SsnAuthority = new Core.Model.DataTypes.IdentityDomain()
+                    {
+                        DomainName = "SSN",
+                        Oid = "2.16.840.1.113883.4.1",
+                        Url = "http://hl7.org/fhir/sid/us-ssn",
+                        IdentifierClassificationKey = IdentifierTypeKeys.NationalInsurance
                     },
                     Security = Hl7AuthenticationMethod.Msh8,
                     IdentifierReplacementBehavior = IdentifierReplacementMode.Specific,
@@ -86,7 +94,7 @@ namespace SanteDB.Dcg.Configuration
                     },
                     StrictAssigningAuthorities = true,
                     StrictMetadataMatch = true
-                });
+                }); ;
             }
             return configuration;
 

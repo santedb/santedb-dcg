@@ -61,8 +61,8 @@ namespace SanteDB.Dcg
             catch (Exception e)
             {
                 Trace.TraceError("The service reported an error: {0}", e);
-                EventLog.WriteEntry("SanteDB Portal Process", $"Service Startup reported an error: {e}", EventLogEntryType.Error, 1911);
-                Environment.FailFast($"Error starting WWW service: {e.Message}");
+                EventLog.WriteEntry("SanteDB", $"Service Startup reported an error: {e}", EventLogEntryType.Error, 1911);
+                Environment.FailFast($"Error starting DCG service: {e.Message}");
             }
         }
 
@@ -79,9 +79,9 @@ namespace SanteDB.Dcg
             }
             catch (Exception e)
             {
-                EventLog.WriteEntry("SanteDB Portal Process", $"Service Shutdown reported an error: {e}", EventLogEntryType.Error, 1911);
+                EventLog.WriteEntry("SanteDB", $"Service Shutdown reported an error: {e}", EventLogEntryType.Error, 1911);
                 Trace.TraceError("The service reported an error: {0}", e);
-                Environment.FailFast($"Error stopping WWW service: {e.Message}");
+                Environment.FailFast($"Error stopping DCG service: {e.Message}");
             }
         }
     }

@@ -52,7 +52,6 @@ namespace SanteDB.Dcg
         {
             // Delay fire - allow other objects to finish up on the restart request event
             this.m_restartRequested = true;
-
             ServiceUtil.Stop();
             Environment.Exit(0);
         }

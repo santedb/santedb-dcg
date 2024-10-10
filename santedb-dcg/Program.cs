@@ -47,6 +47,7 @@ using SanteDB.Core.Diagnostics.Tracing;
 using SanteDB.Client.Batteries;
 using SanteDB.Client.Configuration.Upstream;
 using SanteDB.Client.Configuration;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace SanteDB.Dcg
 {
@@ -62,42 +63,6 @@ namespace SanteDB.Dcg
         static ManualResetEvent m_quitEvent = new ManualResetEvent(false);
 
         /// <summary>
-        /// Prompt for a masked password prompt
-        /// </summary>
-        internal static string PasswordPrompt(string prompt)
-        {
-            Console.Write(prompt);
-
-            var c = (ConsoleKey)0;
-            StringBuilder passwd = new StringBuilder();
-            while (c != ConsoleKey.Enter)
-            {
-                var ki = Console.ReadKey();
-                c = ki.Key;
-
-                if (c == ConsoleKey.Backspace)
-                {
-                    if (passwd.Length > 0)
-                    {
-                        passwd = passwd.Remove(passwd.Length - 1, 1);
-                        Console.Write(" \b");
-                    }
-                    else
-                        Console.CursorLeft = Console.CursorLeft + 1;
-                }
-                else if (c == ConsoleKey.Escape)
-                    return String.Empty;
-                else if (c != ConsoleKey.Enter)
-                {
-                    passwd.Append(ki.KeyChar);
-                    Console.Write("\b*");
-                }
-            }
-            Console.WriteLine();
-            return passwd.ToString();
-        }
-
-        /// <summary>
         /// The main entry point for the application.
         /// </summary>
         static void Main(String[] args)
@@ -111,7 +76,7 @@ namespace SanteDB.Dcg
             var entryAsm = Assembly.GetEntryAssembly();
             Console.WriteLine("SanteDB Disconnected Gateway (SanteDB-DCG) {0} ({1})", entryAsm.GetName().Version, entryAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion);
             Console.WriteLine("{0}", entryAsm.GetCustomAttribute<AssemblyCopyrightAttribute>().Copyright);
-            Console.WriteLine("Complete Copyright information available at http://github.com/santedb/santedb-www");
+            Console.WriteLine("Complete Copyright information available at http://github.com/santedb/santedb-dcg");
 
             // Parameters to force load?
             var dllFiles = Directory.GetFiles(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), "Sante*.dll");
@@ -149,11 +114,17 @@ namespace SanteDB.Dcg
             {
 
                 // Detect platform
-                if (System.Environment.OSVersion.Platform != PlatformID.Win32NT)
-                    Trace.TraceWarning("Not running on WindowsNT, some features may not function correctly");
-                else if (!EventLog.SourceExists("SanteDB"))
-                    EventLog.CreateEventSource("SanteDB", "santedb-dcg");
-
+                try
+                {
+                    if (System.Environment.OSVersion.Platform != PlatformID.Win32NT)
+                        Trace.TraceWarning("Not running on WindowsNT, some features may not function correctly");
+                    else if (!EventLog.SourceExists("SanteDB"))
+                        EventLog.CreateEventSource("SanteDB", "santedb-dcg");
+                }
+                catch(Exception e)
+                {
+                    Trace.TraceWarning("CAnnot detect Windows Event Log {0}", e.ToHumanReadableString());
+                }
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, error) =>
                 {
@@ -177,14 +148,14 @@ namespace SanteDB.Dcg
                 }
 
                 AppDomain.CurrentDomain.SetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA, parms.BaseUrl);
-
+                Trace.TraceInformation("Binding to {0}", AppDomain.CurrentDomain.GetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA));
 
                 if (parms.ShowHelp)
                     parser.WriteHelp(Console.Out);
                 else if (parms.Reset)
                 {
-                    var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", parms.InstanceName);
-                    var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", parms.InstanceName);
+                    var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", "dcg", parms.InstanceName);
+                    var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", "dcg", parms.InstanceName);
                     if (Directory.Exists(appData)) Directory.Delete(cData, true);
                     if (Directory.Exists(appData)) Directory.Delete(appData, true);
                     Console.WriteLine("Environment Reset Successful");
@@ -249,7 +220,7 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Install)
                 {
-                    string serviceName = $"sdb-www-{parms.InstanceName}";
+                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
                     if (!ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
                         String argList = String.Empty;
@@ -257,9 +228,11 @@ namespace SanteDB.Dcg
                             argList += $" --appname=\"{parms.ApplicationName}\"";
                         if (!String.IsNullOrEmpty(parms.ApplicationSecret))
                             argList += $" --appsecret=\"{parms.ApplicationSecret}\"";
+                        if (!String.IsNullOrEmpty(parms.BaseUrl))
+                            argList += $" --base=\"{parms.BaseUrl}\"";
 
                         ServiceTools.ServiceInstaller.Install(
-                            serviceName, $"SanteDB WWW ({parms.InstanceName})",
+                            serviceName, $"SanteDB DCG ({parms.InstanceName})",
                             $"{entryAsm.Location} --name=\"{parms.InstanceName}\" {argList}",
                             null, null, ServiceTools.ServiceBootFlag.AutoStart);
                     }
@@ -268,7 +241,7 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Uninstall)
                 {
-                    string serviceName = $"sdb-www-{parms.InstanceName}";
+                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                         ServiceTools.ServiceInstaller.Uninstall(serviceName);
                     else
@@ -276,7 +249,7 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Restart)
                 {
-                    string serviceName = $"sdb-www-{parms.InstanceName}";
+                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
                         Console.Write("Stopping {0}...", serviceName);
