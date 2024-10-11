@@ -4,7 +4,9 @@
 #define MyAppName "SanteDB Disconnected Gateway"
 #define MyAppPublisher "SanteDB Community"
 #define MyAppURL "http://santesuite.org"
+#ifndef MyAppVersion
 #define MyAppVersion "3.0"
+#endif
 #define SanteDBSdkPath "..\santedb-sdk"      
 
 
