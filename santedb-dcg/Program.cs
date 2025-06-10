@@ -164,12 +164,19 @@ namespace SanteDB.Dcg
                 else if (parms.ConsoleMode)
                 {
 #if DEBUG
-                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Informational, "SanteDB.Data", new Dictionary<String, EventLevel>()), EventLevel.Informational);
+                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Informational, "SanteDB", new Dictionary<String, EventLevel>()
+                        { 
+                        { "SanteDB", EventLevel.Informational }
+                        }
+                    ), EventLevel.Informational);
 #else
-                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Warning, "SanteDB.Data", new Dictionary<String, EventLevel>()), EventLevel.Warning);
+                    Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Warning, "SanteDB", new Dictionary<String, EventLevel>()
+                        { 
+                        { "SanteDB", EventLevel.Warning }
+                        }
+                    ), EventLevel.Warning);
 #endif
                     Trace.Listeners.Add(new ConsoleTraceListener());
-
                     var context = CreateContext(parms);
 
                     ServiceUtil.Start(Guid.NewGuid(), context);

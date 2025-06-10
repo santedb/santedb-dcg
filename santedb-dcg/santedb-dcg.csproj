@@ -170,7 +170,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <PreBuildEvent>
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\admin" --output="$(TargetDir)\applets\org.santedb.admin.pak"
       "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\config.init" --output="$(TargetDir)\applets\org.santedb.config.init.pak"
       "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\config" --output="$(TargetDir)\applets\org.santedb.config.pak"
       "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\core" --output="$(TargetDir)\applets\org.santedb.core.pak"
