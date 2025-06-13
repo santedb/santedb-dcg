@@ -1,185 +1,117 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <ItemGroup>
-    <PackageReference Include="FirebirdSql.Data.FirebirdClient">
-      <Version>9.1.1</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Data.Sqlite.Core">
-      <Version>9.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="MSBuildTasks" Version="1.5.0.235">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Npgsql">
-      <Version>8.0.6</Version>
-    </PackageReference>
-    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl">
-      <Version>2.1.8</Version>
-    </PackageReference>
-    <PackageReference Include="SQLiteSpellfix.lib.e_sqlite3mc">
-      <Version>2.2.0</Version>
-    </PackageReference>
-  </ItemGroup>
-  <Choose>
-    <When Condition="$(VersionNumber.Contains('-'))">
-      <PropertyGroup>
-        <VersionNumberInfo>$(VersionNumber.Substring(0, $(VersionNumber.IndexOf('-'))))</VersionNumberInfo>
-      </PropertyGroup>
-    </When>
-    <Otherwise>
-      <PropertyGroup>
-        <VersionNumberInfo>$(VersionNumber)</VersionNumberInfo>
-      </PropertyGroup>
-    </Otherwise>
-  </Choose>
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup Condition="'$(VersionNumber)' == ''">
-    <VersionNumber>3.0.0-debug</VersionNumber>
+    <VersionNumber>3.0-debug</VersionNumber>
   </PropertyGroup>
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C56C5F24-211D-4C33-BA33-FBA4E0C97DF5}</ProjectGuid>
+      <SanteDBSDK>C:\Program Files\SanteSuite\SanteDB\SDK</SanteDBSDK>
+      <_SanteDBSDKPakMan>$(SanteDBSDK)\pakman.exe</_SanteDBSDKPakMan>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SanteDB.Dcg</RootNamespace>
     <AssemblyName>santedb-dcg</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <AssemblyTitle>santedb-dcg</AssemblyTitle>
+    <Product>santedb-dcg</Product>
+    <Copyright>Copyright (C) 2020-2025 SanteSuite Contributors (see NOTICE)</Copyright>
+    <InformationalVersion>Alberta</InformationalVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>false</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'SignedRelease|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\bin\SignedRelease\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
+    <FileVersion>$(VersionNumber)</FileVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <RootNamespace>SanteDB.Dcg</RootNamespace>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <OutputPath>..\bin\Debug</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <OutputPath>..\bin\Release</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="9.1.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.6" />
+    <PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.8" />
+    <PackageReference Include="SQLiteSpellfix.lib.e_sqlite3mc" Version="2.2.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="Mono.Posix" Version="7.1.0-final.1.21458.1" />
+  </ItemGroup>
   <ItemGroup>
     <Reference Include="MohawkCollege.Util.Console.Parameters">
       <HintPath>..\Solution Items\MohawkCollege.Util.Console.Parameters.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.configuration" />
-    <Reference Include="System.Configuration.Install" />
-    <Reference Include="System.Core" />
     <Reference Include="System.ServiceProcess" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Configuration\FhirInitialConfigurationProvider.cs" />
-    <Compile Include="Configuration\GatewayInitialConfigurationProvider.cs" />
-    <Compile Include="Configuration\Hl7InitialConfigurationProvider.cs" />
-    <Compile Include="Configuration\SanteGuardInitialConfigurationProvider.cs" />
-    <Compile Include="ConsoleParameters.cs" />
-    <Compile Include="GatewayApplicationContext.cs" />
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Version.cs" />
-    <Compile Include="SanteDbService.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="SanteDbService.designer.cs">
-      <DependentUpon>SanteDbService.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ServiceInstaller.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="ServiceTool.cs" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\SanteDB.licenseheader">
       <Link>SanteDB.licenseheader</Link>
     </None>
     <None Include="App.config">
-      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Mono.Posix-4.5">
-      <Version>4.5.0</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Client">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Matcher">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Client.Batteries">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Client.Disconnected">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Messaging.FHIR">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Messaging.HL7">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Persistence.Data">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Persistence.Data">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Persistence.Data.Synchronization" Version="$(VersionNumber)" />
-    <PackageReference Include="SanteDB.Persistence.Data.Auditing">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteDB.Persistence.Data.PubSub">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
-    <PackageReference Include="SanteGuard.Client">
-      <Version>$(VersionNumber)</Version>
-    </PackageReference>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="icon.ico" />
+    <Folder Include="Properties\" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <PreBuildEvent>
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\config.init" --output="$(TargetDir)\applets\org.santedb.config.init.pak"
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\config" --output="$(TargetDir)\applets\org.santedb.config.pak"
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\core" --output="$(TargetDir)\applets\org.santedb.core.pak"
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\uicore" --output="$(TargetDir)\applets\org.santedb.uicore.pak"
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\bicore" --output="$(TargetDir)\applets\org.santedb.bicore.pak"
-      "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" --compile --version=$(VersionNumber) --source="$(SolutionDir)..\applets\locales\en" --output="$(TargetDir)\applets\org.santedb.i18n.en.pak"
-     
-    </PreBuildEvent>
-  </PropertyGroup>
-  <Target Name="BeforeBuild" Condition="!$(VersionNumber.EndsWith('-debug'))">
-    <AssemblyInfo CodeLanguage="CS" OutputFile="$(MSBuildProjectDirectory)\Properties\Version.cs" AssemblyVersion="$(VersionNumberInfo)" AssemblyFileVersion="$(VersionNumberInfo)" />
+  <Choose>
+    <When Condition="$(SolutionName.Contains('-nuget'))">
+      <ItemGroup>
+        <PackageReference Include="SanteDB.Client" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Matcher" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Client.Batteries" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Client.Disconnected" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Messaging.FHIR" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Messaging.HL7" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Persistence.Data" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Persistence.Data.Synchronization" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Persistence.Data.Auditing" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteDB.Persistence.Data.PubSub" Version="$(VersionNumber)" />
+        <PackageReference Include="SanteGuard.Client" Version="$(VersionNumber)" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client\SanteDB.Client.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Batteries\SanteDB.Client.Batteries.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Disconnected\SanteDB.Client.Disconnected.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Data\SanteDB.Persistence.Data.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Synchronization.ADO\SanteDB.Persistence.Synchronization.ADO.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Auditing.ADO\SanteDB.Persistence.Auditing.ADO.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.PubSub.ADO\SanteDB.Persistence.PubSub.ADO.csproj">
+        </ProjectReference>
+        <ProjectReference Include="..\..\santeguard\SanteGuard.Client\SanteGuard.Client.csproj">
+        </ProjectReference>
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <Target Name="_SanteDBBuildApplets" BeforeTargets="BeforeBuild" Condition="'$(Configuration)'=='Debug'">
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\config.init&quot; --output=&quot;$(TargetDir)\applets\org.santedb.config.init.pak&quot;" ConsoleToMSBuild="True" />
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\config&quot; --output=&quot;$(TargetDir)\applets\org.santedb.config.pak&quot;" ConsoleToMSBuild="True" />
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\core&quot; --output=&quot;$(TargetDir)\applets\org.santedb.core.pak&quot;" ConsoleToMSBuild="True" />
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\uicore&quot; --output=&quot;$(TargetDir)\applets\org.santedb.uicore.pak&quot;" ConsoleToMSBuild="True" />
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\bicore&quot; --output=&quot;$(TargetDir)\applets\org.santedb.bicore.pak&quot;" ConsoleToMSBuild="True" />
+      <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\locales\en&quot; --output=&quot;$(TargetDir)\applets\org.santedb.i18n.en.pak&quot;" ConsoleToMSBuild="True" />
   </Target>
 </Project>
