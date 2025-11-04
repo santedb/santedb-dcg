@@ -350,7 +350,7 @@ namespace SanteDB.Dcg
             var configurationFile = Path.Combine(configDirectory, "santedb.config");
             if (File.Exists(configurationFile))
             {
-                configurationManager = new FileConfigurationService(configurationFile, true);
+                configurationManager = new FileConfigurationService(configurationFile, isReadonly: false);
             }
             else
             {
