@@ -124,6 +124,13 @@ namespace SanteDB.Dcg
         public string BaseUrl { get; set; }
 
         /// <summary>
+        /// Bind the certificate 
+        /// </summary>
+        [Parameter("install-cert")]
+        [Description("Bind a certificate to the HTTPs port")]
+        public bool AutoBindCertificate { get; set; }
+
+        /// <summary>
         /// Convert this object back to an argument list
         /// </summary>
         internal IEnumerable<String> ToArgumentList()

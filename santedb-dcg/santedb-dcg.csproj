@@ -66,46 +66,46 @@
   </ItemGroup>
   <Choose>
     <When Condition="$(SolutionName.Contains('-nuget'))">
-      <ItemGroup>
-        <PackageReference Include="SanteDB.Client" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Matcher" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Client.Batteries" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Client.Disconnected" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Messaging.FHIR" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Messaging.HL7" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Persistence.Data" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Persistence.Data.Synchronization" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Persistence.Data.Auditing" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteDB.Persistence.Data.PubSub" Version="$(VersionNumber)" />
-        <PackageReference Include="SanteGuard.Client" Version="$(VersionNumber)" />
-      </ItemGroup>
+		<ItemGroup>
+			<ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client\SanteDB.Client.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Batteries\SanteDB.Client.Batteries.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Disconnected\SanteDB.Client.Disconnected.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Data\SanteDB.Persistence.Data.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Synchronization.ADO\SanteDB.Persistence.Synchronization.ADO.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Auditing.ADO\SanteDB.Persistence.Auditing.ADO.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.PubSub.ADO\SanteDB.Persistence.PubSub.ADO.csproj">
+			</ProjectReference>
+			<ProjectReference Include="..\..\santeguard\SanteGuard.Client\SanteGuard.Client.csproj">
+			</ProjectReference>
+		</ItemGroup>
     </When>
     <Otherwise>
-      <ItemGroup>
-        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client\SanteDB.Client.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Batteries\SanteDB.Client.Batteries.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client.Disconnected\SanteDB.Client.Disconnected.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Data\SanteDB.Persistence.Data.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Synchronization.ADO\SanteDB.Persistence.Synchronization.ADO.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.Auditing.ADO\SanteDB.Persistence.Auditing.ADO.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santedb-data\SanteDB.Persistence.PubSub.ADO\SanteDB.Persistence.PubSub.ADO.csproj">
-        </ProjectReference>
-        <ProjectReference Include="..\..\santeguard\SanteGuard.Client\SanteGuard.Client.csproj">
-        </ProjectReference>
-      </ItemGroup>
-    </Otherwise>
+		<ItemGroup>
+			<PackageReference Include="SanteDB.Client" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Matcher" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Client.Batteries" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Client.Disconnected" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Messaging.FHIR" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Messaging.HL7" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Persistence.Data" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Persistence.Data.Synchronization" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Persistence.Data.Auditing" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteDB.Persistence.Data.PubSub" Version="$(VersionNumber)" />
+			<PackageReference Include="SanteGuard.Client" Version="$(VersionNumber)" />
+		</ItemGroup>
+	</Otherwise>
   </Choose>
   <Target Name="_SanteDBBuildApplets" BeforeTargets="BeforeBuild" Condition="'$(Configuration)'=='Debug'">
       <Exec Command="&quot;$(_SanteDBSDKPakMan)&quot; --compile --version=$(VersionNumber) --source=&quot;$(SolutionDir)..\applets\config.init&quot; --output=&quot;$(TargetDir)\applets\org.santedb.config.init.pak&quot;" ConsoleToMSBuild="True" />

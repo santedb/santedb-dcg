@@ -17,12 +17,28 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
+using DocumentFormat.OpenXml.Wordprocessing;
 using MohawkCollege.Util.Console.Parameters;
+using Mono.Unix;
+using Mono.Unix.Native;
+using SanteDB.Client.Batteries;
+using SanteDB.Client.Configuration;
+using SanteDB.Client.Configuration.Upstream;
+using SanteDB.Client.Rest;
+using SanteDB.Core;
+using SanteDB.Core.Applets.Services;
+using SanteDB.Core.Configuration;
+using SanteDB.Core.Data.Backup;
 using SanteDB.Core.Diagnostics;
+using SanteDB.Core.Diagnostics.Tracing;
 using SanteDB.Core.Model.Security;
+using SanteDB.Core.Services;
+using SanteDB.Core.Services.Impl;
+using SanteDB.Security.Certs.BouncyCastle;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -31,23 +47,8 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using SanteDB.Core.Configuration;
-using SanteDB.Core;
-using SanteDB.Core.Applets.Services;
-using SanteDB.Core.Services.Impl;
-using SanteDB.Core.Services;
-using System.Diagnostics.Tracing;
-using SanteDB.Client.Rest;
-using SanteDB.Core.Data.Backup;
-using Mono.Unix.Native;
-using Mono.Unix;
-using SanteDB.Core.Diagnostics.Tracing;
-using SanteDB.Client.Batteries;
-using SanteDB.Client.Configuration.Upstream;
-using SanteDB.Client.Configuration;
-using DocumentFormat.OpenXml.Wordprocessing;
+using System.Threading.Tasks;
 
 namespace SanteDB.Dcg
 {
@@ -144,7 +145,11 @@ namespace SanteDB.Dcg
                 // Different binding port?
                 if (String.IsNullOrEmpty(parms.BaseUrl))
                 {
+#if DEBUG
                     parms.BaseUrl = "http://127.0.0.1:9200";
+#else
+                    parms.BaseUrl = "https://127.0.0.1:9200";
+#endif
                 }
 
                 AppDomain.CurrentDomain.SetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA, parms.BaseUrl);
@@ -242,6 +247,12 @@ namespace SanteDB.Dcg
                             serviceName, $"SanteDB DCG ({parms.InstanceName})",
                             $"{entryAsm.Location} --name=\"{parms.InstanceName}\" {argList}",
                             null, null, ServiceTools.ServiceBootFlag.AutoStart);
+
+                        // Is the binding a HTTPS endpoint ?
+                        if (parms.AutoBindCertificate)
+                        {
+                            RestDebugCertificateInstallation.InstallDebuggerCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
+                        }
                     }
                     else
                         throw new InvalidOperationException("Service instance already installed");
@@ -249,10 +260,16 @@ namespace SanteDB.Dcg
                 else if (parms.Uninstall)
                 {
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";
-                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
+                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName)) 
                         ServiceTools.ServiceInstaller.Uninstall(serviceName);
                     else
                         throw new InvalidOperationException("Service instance not installed");
+
+                    // Is the binding a HTTPS endpoint ?
+                    if (parms.AutoBindCertificate)
+                    {
+                        RestDebugCertificateInstallation.UninstallDebugCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
+                    }
                 }
                 else if (parms.Restart)
                 {
