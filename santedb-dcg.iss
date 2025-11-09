@@ -53,7 +53,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: ".\bin\Release\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\Release\runtimes\*"; DestDir: "{app}\runtimes"; Flags: recursesubdirs ignoreversion
-Source: ".\bin\Release\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion
+Source: ".\bin\Release\Applets\*.pak"; DestDir: "{app}\Applets"; Flags: ignoreversion; Excludes: org.santedb.admin.pak;
 Source: ".\bin\Release\santedb-dcg.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\bin\Release\santedb-dcg.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\installsupp\restart.bat"; DestDir: "{app}"; Flags: ignoreversion;
