@@ -126,7 +126,7 @@ namespace SanteDB.Dcg
         /// <summary>
         /// Bind the certificate 
         /// </summary>
-        [Parameter("install-cert")]
+        [Parameter("autogencert")]
         [Description("Bind a certificate to the HTTPs port")]
         public bool AutoBindCertificate { get; set; }
 
