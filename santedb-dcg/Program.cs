@@ -266,10 +266,10 @@ namespace SanteDB.Dcg
                         throw new InvalidOperationException("Service instance not installed");
 
                     // Is the binding a HTTPS endpoint ?
-                    if (parms.AutoBindCertificate)
-                    {
-                        RestDebugCertificateInstallation.UninstallDebugCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
-                    }
+                    //if (parms.AutoBindCertificate)
+                    //{
+                    //    RestDebugCertificateInstallation.UninstallDebugCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
+                    //}
                 }
                 else if (parms.Restart)
                 {
