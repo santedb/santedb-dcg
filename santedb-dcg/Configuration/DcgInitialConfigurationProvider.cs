@@ -19,7 +19,7 @@ namespace SanteDB.Dcg.Configuration
         /// <summary>
         /// Order of the apply of this configuration provider
         /// </summary>
-        public int Order => Int32.MaxValue;
+        public int Order => Int16.MaxValue;
 
         /// <summary>
         /// Apply the configuration

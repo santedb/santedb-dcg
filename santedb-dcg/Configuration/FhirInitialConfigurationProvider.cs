@@ -23,7 +23,7 @@ namespace SanteDB.Dcg.Configuration
         public const string BINDING_BASE_DATA = "http.binding";
 
         /// <inheritdoc/>
-        public int Order => Int32.MaxValue;
+        public int Order => Int16.MaxValue;
 
         /// <inheritdoc/>
         public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration configuration)

@@ -17,7 +17,7 @@ namespace SanteDB.Dcg.Configuration
     /// </summary>
     public class GatewayInitialConfigurationProvider : IInitialConfigurationProvider
     {
-        public int Order => Int32.MaxValue;
+        public int Order => Int16.MaxValue;
 
         public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration configuration)
         {

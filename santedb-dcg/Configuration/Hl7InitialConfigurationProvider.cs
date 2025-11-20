@@ -39,7 +39,7 @@ namespace SanteDB.Dcg.Configuration
         /// <summary>
         /// Get the order of application
         /// </summary>
-        public int Order => Int32.MaxValue;
+        public int Order => Int16.MaxValue;
 
         private IHL7MessageHandler CreateHandlerNull(Type handlerType)
         {

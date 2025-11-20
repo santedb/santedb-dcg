@@ -36,7 +36,7 @@ namespace SanteDB.Dcg.Configuration
     public class SanteGuardInitialConfigurationProvider : IInitialConfigurationProvider
     {
         /// <inheritdoc/>
-        public int Order => Int32.MaxValue;
+        public int Order => Int16.MaxValue;
 
         /// <inheritdoc/>
         public SanteDBConfiguration Provide(SanteDBHostType hostContextType, SanteDBConfiguration existing)
