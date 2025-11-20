@@ -61,21 +61,23 @@ Source: ".\installsupp\VC_redist.x64.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 Source: ".\installsupp\netfx.exe"; DestDir: "{tmp}"; Flags: dontcopy;
 
 [Icons]
-Filename: "http://127.0.0.1:9200"; Name: "{group}\SanteDB\Disconnected Gateway Admin"; IconFilename: "{app}\santedb-dcg.exe"
+Filename: "https://127.0.0.1:9200"; Name: "{group}\SanteDB\Disconnected Gateway"; IconFilename: "{app}\santedb-dcg.exe"
 Filename: "{app}\santedb-dcg.exe"; Parameters: "--restart"; Name: "{group}\SanteDB\Restart Disconnected Gateway";  IconFilename: "{app}\santedb-dcg.exe"
-Filename: "http://127.0.0.1:9200"; Name: "{commondesktop}\Disconnected Gateway"; IconFilename: "{app}\santedb-dcg.exe"
+Filename: "https://127.0.0.1:9200"; Name: "{commondesktop}\Disconnected Gateway"; IconFilename: "{app}\santedb-dcg.exe"
 
 [Run]
-Filename: "{app}\santedb-dcg.exe";StatusMsg: "Installing Services..."; Parameters: "--install"; Description: "Installing Service"; Flags: runhidden
+Filename: "{app}\santedb-dcg.exe";StatusMsg: "Installing Services..."; Parameters: "--install --bindcert"; Description: "Installing Service"; Flags: runhidden
 Filename: "net.exe";StatusMsg: "Starting Services..."; Parameters: "start sdb-dcg-default"; Description: "Start Gateway Service"; Flags: runhidden
-Filename: "http://127.0.0.1:9200"; Description: "Configure the Disconnected Gateway"; Flags: postinstall shellexec
-Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway TCP"" dir=in protocol=TCP localport=9200,12100 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
+Filename: "https://127.0.0.1:9200"; Description: "Configure the Disconnected Gateway"; Flags: postinstall shellexec
+Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway TCP"" dir=in protocol=TCP localport=9200 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
 Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall add rule name=""Disconnected Gateway UDP"" dir=in protocol=UDP localport=11514 action=allow"; StatusMsg: "Configuring Firewall"; Flags: runhidden
 
 [UninstallRun]
 Filename: "net.exe";StatusMsg: "Stopping Services..."; Parameters: "stop sdb-dcg-default"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Configuration Data...";  Parameters: "--reset"; Flags: runhidden
 Filename: "{app}\santedb-dcg.exe";StatusMsg: "Removing Services..."; Parameters: "--uninstall"; Flags: runhidden
+Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Disconnected Gateway TCP"""; StatusMsg: "Configuring Firewall"; Flags: runhidden
+Filename: "c:\windows\system32\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Disconnected Gateway UDP"""; StatusMsg: "Configuring Firewall"; Flags: runhidden
 
 [Code]
 function PrepareToInstall(var needsRestart:Boolean): String;

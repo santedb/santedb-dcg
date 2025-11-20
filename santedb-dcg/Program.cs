@@ -17,7 +17,7 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
-using DocumentFormat.OpenXml.Wordprocessing;
+
 using MohawkCollege.Util.Console.Parameters;
 using Mono.Unix;
 using Mono.Unix.Native;
@@ -50,6 +50,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+[assembly: Guid("E65AB546-1345-42E7-82D2-0914336CD71E")]
 namespace SanteDB.Dcg
 {
     /// <summary>
@@ -148,7 +149,7 @@ namespace SanteDB.Dcg
 #if DEBUG
                     parms.BaseUrl = "http://127.0.0.1:9200";
 #else
-                    parms.BaseUrl = "https://127.0.0.1:9200";
+                    parms.BaseUrl = "https://0.0.0.0:9200";
 #endif
                 }
 
@@ -235,18 +236,14 @@ namespace SanteDB.Dcg
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";
                     if (!ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
-                        String argList = String.Empty;
-                        if (!String.IsNullOrEmpty(parms.ApplicationName))
-                            argList += $" --appname=\"{parms.ApplicationName}\"";
-                        if (!String.IsNullOrEmpty(parms.ApplicationSecret))
-                            argList += $" --appsecret=\"{parms.ApplicationSecret}\"";
-                        if (!String.IsNullOrEmpty(parms.BaseUrl))
-                            argList += $" --base=\"{parms.BaseUrl}\"";
+                        String argList = String.Join(" ", parms.ToArgumentList());
 
+#if !DEBUG
                         ServiceTools.ServiceInstaller.Install(
                             serviceName, $"SanteDB DCG ({parms.InstanceName})",
-                            $"{entryAsm.Location} --name=\"{parms.InstanceName}\" {argList}",
+                            $"{entryAsm.Location} {argList}",
                             null, null, ServiceTools.ServiceBootFlag.AutoStart);
+#endif
 
                         // Is the binding a HTTPS endpoint ?
                         if (parms.AutoBindCertificate)
@@ -260,20 +257,22 @@ namespace SanteDB.Dcg
                 else if (parms.Uninstall)
                 {
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";
+#if !DEBUG
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName)) 
                         ServiceTools.ServiceInstaller.Uninstall(serviceName);
                     else
                         throw new InvalidOperationException("Service instance not installed");
-
+#endif
                     // Is the binding a HTTPS endpoint ?
-                    //if (parms.AutoBindCertificate)
-                    //{
-                    //    RestDebugCertificateInstallation.UninstallDebugCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
-                    //}
+                    if (parms.AutoBindCertificate)
+                    {
+                        RestDebugCertificateInstallation.UninstallDebugCertificate(new Uri(parms.BaseUrl), new BouncyCastleCertificateGenerator());
+                    }
                 }
                 else if (parms.Restart)
                 {
                     string serviceName = $"sdb-dcg-{parms.InstanceName}";
+
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
                         Console.Write("Stopping {0}...", serviceName);
