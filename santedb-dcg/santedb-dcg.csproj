@@ -33,6 +33,7 @@
 		<InformationalVersion>Alberta</InformationalVersion>
 		<FileAlignment>512</FileAlignment>
 		<FileVersion>$(VersionNumberInfo)</FileVersion>
+		<Version>$(VersionNumberInfo)</Version>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<RootNamespace>SanteDB.Dcg</RootNamespace>
 		<ApplicationIcon>icon.ico</ApplicationIcon>
