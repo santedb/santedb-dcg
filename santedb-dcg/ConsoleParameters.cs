@@ -131,6 +131,13 @@ namespace SanteDB.Dcg
         public bool AutoBindCertificate { get; set; }
 
         /// <summary>
+        /// Rotate the keys used for encryption
+        /// </summary>
+        [Parameter("reencrypt")]
+        [Description("Re-encrypt the database and configuration file using ALE")]
+        public bool ReEncrypt { get; set; }
+
+        /// <summary>
         /// Convert this object back to an argument list
         /// </summary>
         internal IEnumerable<String> ToArgumentList()

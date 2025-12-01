@@ -28,15 +28,20 @@ using SanteDB.Client.Rest;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Configuration;
+using SanteDB.Core.Configuration.Data;
 using SanteDB.Core.Data.Backup;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Diagnostics.Tracing;
 using SanteDB.Core.Model.Security;
+using SanteDB.Core.Security;
 using SanteDB.Core.Services;
 using SanteDB.Core.Services.Impl;
+using SanteDB.OrmLite.Configuration;
+using SanteDB.OrmLite.Providers;
 using SanteDB.Security.Certs.BouncyCastle;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -45,6 +50,7 @@ using System.Net;
 using System.Net.Security;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.ServiceProcess;
 using System.Text;
 using System.Threading;
@@ -155,9 +161,20 @@ namespace SanteDB.Dcg
 
                 AppDomain.CurrentDomain.SetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA, parms.BaseUrl);
                 Trace.TraceInformation("Binding to {0}", AppDomain.CurrentDomain.GetData(RestServiceInitialConfigurationProvider.BINDING_BASE_DATA));
+                string serviceName = $"sdb-dcg-{parms.InstanceName}";
 
                 if (parms.ShowHelp)
                     parser.WriteHelp(Console.Out);
+                else if (parms.ReEncrypt)
+                {
+                    if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName) &&
+                        ServiceTools.ServiceInstaller.GetServiceStatus(serviceName) != ServiceTools.ServiceState.Stop)
+                    {
+                        Console.WriteLine("Stopping {0}...", serviceName);
+                        ServiceTools.ServiceInstaller.StopService(serviceName);
+                    }
+                    ReEncrypt(parms.InstanceName);
+                }
                 else if (parms.Reset)
                 {
                     var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", "dcg", parms.InstanceName);
@@ -233,7 +250,6 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Install)
                 {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
                     if (!ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
                         String argList = String.Join(" ", parms.ToArgumentList());
@@ -256,7 +272,6 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Uninstall)
                 {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
 #if !DEBUG
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName)) 
                         ServiceTools.ServiceInstaller.Uninstall(serviceName);
@@ -271,7 +286,6 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Restart)
                 {
-                    string serviceName = $"sdb-dcg-{parms.InstanceName}";
 
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName))
                     {
@@ -318,6 +332,109 @@ namespace SanteDB.Dcg
                 EventLog.WriteEntry("SanteDB Gateway Process", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
 #endif
                 Environment.Exit(911);
+            }
+        }
+        
+        /// <summary>
+        /// Re-Encrypt the ALE services
+        /// </summary>
+        private static void ReEncrypt(string instanceName)
+        {
+            SanteDBConfiguration configuration = null;
+
+#if DEBUG
+            var configFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "santedb", "dcg", instanceName, "santedb.config.xml");
+#else 
+            var configFile = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", instanceName, "config", "santedb.config.xml");
+#endif 
+
+            using (AuthenticationContext.EnterSystemContext())
+            {
+                try
+                {
+                    using (var fs = File.OpenRead(configFile))
+                    {
+                        configuration = SanteDBConfiguration.Load(fs);
+                    }
+
+                    // Rotate the keys - first we want to get the key we're rotating to
+                    Console.WriteLine("This command will encrypt your configuration file and your database using ALE (if configured). If the configuration and database are already encrypted, the keys will be rotated.");
+                    Console.Write("New Key Thumbprint (enter to disable):");
+                    var newKeyThumb = Console.ReadLine();
+
+                    // Attempt to get the certificate
+                    if (!String.IsNullOrEmpty(newKeyThumb))
+                    {
+                        bool isCurrentUser = X509CertificateUtils.GetPlatformServiceOrDefault().TryGetCertificate(X509FindType.FindByThumbprint, newKeyThumb, StoreName.My, out var certificate),
+                            isLocalMachine = X509CertificateUtils.GetPlatformServiceOrDefault().TryGetCertificate(X509FindType.FindByThumbprint, newKeyThumb, StoreName.My, StoreLocation.LocalMachine, out certificate);
+                        if (!isCurrentUser && !isLocalMachine)
+                        {
+                            throw new InvalidOperationException("Cannot find certificate in CurrentUser\\My or LocalMachine\\My");
+                        }
+
+                        // Replace the key
+                        configuration.ProtectedSectionKey = new Core.Security.Configuration.X509ConfigurationElement(isLocalMachine ? StoreLocation.LocalMachine : StoreLocation.CurrentUser, StoreName.My, X509FindType.FindByThumbprint, newKeyThumb);
+                    }
+                    else
+                    {
+                        configuration.ProtectedSectionKey = null;
+                    }
+
+                    // If ALE is enabled then we want to recrypt
+                    var processedConnections = new List<String>();
+                    foreach (var ormConfiguration in configuration.Sections.OfType<OrmConfigurationBase>())
+                    {
+                        if (ormConfiguration?.AleConfiguration?.AleEnabled != true)
+                            continue;
+
+
+                        processedConnections.Add(ormConfiguration.ReadWriteConnectionString);
+
+                        // Decrypt and recrypt the ALE
+                        try
+                        {
+                            var ormSection = configuration.GetSection<OrmConfigurationSection>();
+                            var connectionString = configuration.GetSection<DataConfigurationSection>()?.ConnectionString.Find(o => o.Name.Equals(ormConfiguration.ReadWriteConnectionString, StringComparison.OrdinalIgnoreCase));
+                            var providerType = ormSection?.Providers.Find(o => o.Invariant == connectionString.Provider).Type;
+                            var provider = Activator.CreateInstance(providerType) as IEncryptedDbProvider;
+
+                            if (provider == null)
+                            {
+                                continue;
+                            }
+
+                            provider.ConnectionString = connectionString.ToString();
+
+                            // Decrypt - 
+                            Console.WriteLine("Rotating keys for {0} (this may take several hours)...", ormConfiguration.GetType().Name);
+                            provider.SetEncryptionSettings(ormConfiguration.AleConfiguration);
+
+                            provider.GetEncryptionProvider();
+
+                            ormConfiguration.AleConfiguration = new OrmAleConfiguration()
+                            {
+                                AleEnabled = configuration.ProtectedSectionKey != null,
+                                Certificate = configuration.ProtectedSectionKey,
+                                EnableFields = ormConfiguration.AleConfiguration.EnableFields,
+                                SaltSeed = ormConfiguration.AleConfiguration.SaltSeed
+                            };
+                            provider.MigrateEncryption(ormConfiguration.AleConfiguration);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new DataException($"Cannot migrate ALE on {ormConfiguration.ReadWriteConnectionString}", e);
+                        }
+                    }
+
+                    using (var fs = File.Create(configFile))
+                    {
+                        configuration.Save(fs);
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw new DataException($"Cannot migrate ALE", e);
+                }
             }
         }
 
