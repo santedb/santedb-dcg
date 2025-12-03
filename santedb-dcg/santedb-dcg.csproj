@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup Condition="'$(VersionNumber)' == ''">
-		<VersionNumber>3.0-debug</VersionNumber>
+	<PropertyGroup>
+		<VersionNumber Condition="'$(VersionNumber)' == ''">3.0-debug</VersionNumber>
+		<VersionNumberInfo Condition="$(VersionNumber.Contains('-'))">$(VersionNumber.Substring(0, $(VersionNumber.IndexOf('-'))))</VersionNumberInfo>
+		<VersionNumberInfo Condition="!$(VersionNumber.Contains('-'))">$(VersionNumber)</VersionNumberInfo>
+		<Version>$(VersionNumber)</Version>
 	</PropertyGroup>
-
 	<PropertyGroup Condition="'$(AppletVersion)'==''">
 		<AppletVersion>3.0.2030.1</AppletVersion>
 	</PropertyGroup>
 	<PropertyGroup>
-		<SanteDBSDK>C:\Program Files\SanteSuite\SanteDB\SDK</SanteDBSDK>
-		<_SanteDBSDKPakMan>$(SanteDBSDK)\pakman.exe</_SanteDBSDKPakMan>
+		<SanteDBSDK Condition="'$(SanteDBSDK)'==''">C:\Program Files\SanteSuite\SanteDB\SDK</SanteDBSDK>
+		<_SanteDBSDKPakMan Condition="'$(_SanteDBSDKPakMan)'==''">$(SanteDBSDK)\pakman.exe</_SanteDBSDKPakMan>
 	</PropertyGroup>
 	<Choose>
 		<When Condition="$(VersionNumber.Contains('-'))">
@@ -23,7 +25,6 @@
 		</Otherwise>
 	</Choose>
 	<PropertyGroup>
-
 		<TargetFramework>net48</TargetFramework>
 		<OutputType>Exe</OutputType>
 		<AssemblyName>santedb-dcg</AssemblyName>
@@ -83,7 +84,7 @@
 		<Folder Include="Properties\" />
 	</ItemGroup>
 	<Choose>
-		<When Condition="$(SolutionName.Contains('-nuget'))">
+		<When Condition="!$(SolutionName.Contains('-nuget'))">
 			<ItemGroup>
 				<ProjectReference Include="..\..\santedb-dc-core\SanteDB.Client\SanteDB.Client.csproj">
 				</ProjectReference>
