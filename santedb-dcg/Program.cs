@@ -80,6 +80,9 @@ namespace SanteDB.Dcg
             var parms = parser.Parse(args);
             parms.InstanceName = String.IsNullOrEmpty(parms.InstanceName) ? "default" : parms.InstanceName;
 
+            // Service Point Manager for MONO - Required for some services such as SMTP
+            ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12 | SecurityProtocolType.Tls13;
+
             // Output copyright info
             var entryAsm = Assembly.GetEntryAssembly();
             Console.WriteLine("SanteDB Disconnected Gateway (SanteDB-DCG) {0} ({1})", entryAsm.GetName().Version, entryAsm.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion);
