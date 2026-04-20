@@ -25,6 +25,8 @@ using SanteDB.Client.Batteries;
 using SanteDB.Client.Configuration;
 using SanteDB.Client.Configuration.Upstream;
 using SanteDB.Client.Rest;
+using SanteDB.Client.UserInterface;
+using SanteDB.Client.UserInterface.Impl;
 using SanteDB.Core;
 using SanteDB.Core.Applets.Services;
 using SanteDB.Core.Configuration;
@@ -32,8 +34,10 @@ using SanteDB.Core.Configuration.Data;
 using SanteDB.Core.Data.Backup;
 using SanteDB.Core.Diagnostics;
 using SanteDB.Core.Diagnostics.Tracing;
+using SanteDB.Core.i18n;
 using SanteDB.Core.Model.Security;
 using SanteDB.Core.Security;
+using SanteDB.Core.Security.Services;
 using SanteDB.Core.Services;
 using SanteDB.Core.Services.Impl;
 using SanteDB.OrmLite.Configuration;
@@ -42,6 +46,7 @@ using SanteDB.Security.Certs.BouncyCastle;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Odbc;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
@@ -55,6 +60,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ZstdSharp.Unsafe;
 
 [assembly: Guid("E65AB546-1345-42E7-82D2-0914336CD71E")]
 namespace SanteDB.Dcg
@@ -101,7 +107,7 @@ namespace SanteDB.Dcg
                 try
                 {
                     var asm = Assembly.LoadFile(itm);
-                    Console.WriteLine("Force Loaded {0}", asm.FullName);
+                    //Console.WriteLine("Force Loaded {0}", asm.FullName);
                 }
                 catch (Exception e)
                 {
@@ -132,7 +138,7 @@ namespace SanteDB.Dcg
                     else if (!EventLog.SourceExists("SanteDB"))
                         EventLog.CreateEventSource("SanteDB", "santedb-dcg");
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Trace.TraceWarning("CAnnot detect Windows Event Log {0}", e.ToHumanReadableString());
                 }
@@ -180,18 +186,67 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Reset)
                 {
-                    var appData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SanteDB", "dcg", parms.InstanceName);
-                    var cData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SanteDB", "dcg", parms.InstanceName);
-                    if (Directory.Exists(appData)) Directory.Delete(cData, true);
+                    GetDirectories(parms, out var cData, out var appData);
+                    if (Directory.Exists(cData)) Directory.Delete(cData, true);
                     if (Directory.Exists(appData)) Directory.Delete(appData, true);
                     Console.WriteLine("Environment Reset Successful");
                     return;
+                }
+                else if (parms.Restore)
+                {
+                    var context = CreateContext(parms);
+                    using (AuthenticationContext.EnterSystemContext())
+                    {
+                        var backupServiceManager = context.GetService<IBackupService>();
+                        var configurationManager = context.GetService<IConfigurationManager>();
+                        var symmEncryption = context.GetService<ISymmetricCryptographicProvider>();
+                        var uiProvider = new ConsoleUserInterfaceInteractionProvider();
+
+                        // List backup files
+                        IBackupDescriptor restoreDescriptor = null;
+                        do
+                        {
+                            restoreDescriptor = SelectBackupDescriptior(backupServiceManager, configurationManager);
+                            if (restoreDescriptor == null)
+                            {
+                                return;
+                            }
+                        } while (!uiProvider.Confirm($"Are you sure you want to restore data from {restoreDescriptor.Label} created on {restoreDescriptor.Timestamp:o}?"));
+                        Console.WriteLine();
+
+                        if (!(configurationManager is InitialConfigurationManager) && uiProvider.Confirm($"This gateway already contains a configuration for {parms.InstanceName} - do you want to reset the environment configuration before restoring?"))
+                        {
+                            GetDirectories(parms, out var cData, out var appData);
+                            if (Directory.Exists(cData)) Directory.Delete(cData, true);
+                            if (Directory.Exists(appData)) Directory.Delete(appData, true);
+                        }
+
+                        try
+                        {
+                            string backupSecret = restoreDescriptor.IsEnrypted ? uiProvider.Prompt(UserMessages.AUTO_RESTORE_BACKUP_SECRET, true)
+                                : String.Empty;
+
+                            if (backupServiceManager is IReportProgressChanged irpc)
+                            {
+                                irpc.ProgressChanged += (o, e) =>
+                                {
+                                    Console.WriteLine($"{e.Progress:%} - {e.State}");
+                                };
+                            }
+                            backupServiceManager.Restore(BackupMedia.Public, restoreDescriptor.Label, backupSecret);
+                            Console.WriteLine("Environment restored");
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine($"FATAL: {e}");
+                        }
+                    }
                 }
                 else if (parms.ConsoleMode)
                 {
 #if DEBUG
                     Tracer.AddWriter(new ConsoleTraceWriter(EventLevel.Informational, "SanteDB", new Dictionary<String, EventLevel>()
-                        { 
+                        {
                         { "SanteDB", EventLevel.Informational }
                         }
                     ), EventLevel.Informational);
@@ -337,7 +392,73 @@ namespace SanteDB.Dcg
                 Environment.Exit(911);
             }
         }
-        
+
+        /// <summary>
+        /// Select a backup file from the service
+        /// </summary>
+        private static IBackupDescriptor SelectBackupDescriptior(IBackupService backupService, IConfigurationManager configurationManager)
+        {
+            try
+            {
+                var backupConfig = configurationManager.GetSection<BackupConfigurationSection>();
+                var hasShownOptions = false;
+                var ofs = 0;
+                while (true)
+                {
+                    if (!hasShownOptions)
+                    {
+                        Console.WriteLine("Available Backups in {0}:", backupConfig.PublicBackupLocation);
+                        foreach (var itm in backupService.GetBackupDescriptors(BackupMedia.Public).OrderByDescending(o => o.Timestamp).Take(9))
+                        {
+                            Console.WriteLine("\t({0}) - {1} created {2:o}", ofs++, itm.Label, itm.Timestamp);
+                        }
+                        Console.WriteLine("\t(o) - Other File");
+                        Console.WriteLine("\t(r) - Refresh options");
+                        Console.WriteLine("\t(c) - Cancel / abort");
+
+                        Console.Write("Specify Restore Option:");
+                    }
+
+                    var key = Console.ReadKey();
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.R:
+                            hasShownOptions = false;
+                            break;
+                        case ConsoleKey.O:
+                            Console.Write("Provide Absolute Path to Backup File (example: X:\\Backups\\foo.bin):");
+                            var backupFile = Console.ReadLine();
+                            if (!File.Exists(backupFile))
+                            {
+                                Console.WriteLine("Error - cannot find {0}", backupFile);
+                            }
+                            else
+                            {
+                                File.Copy(backupFile, Path.Combine(backupConfig.PublicBackupLocation, Path.GetFileName(backupFile)));
+                                return backupService.GetBackupDescriptorFromFile(backupFile);
+                            }
+                            break;
+                        case ConsoleKey.C:
+                            return null;
+                        default:
+                            if (Int32.TryParse(key.KeyChar.ToString(), out var index) && index < ofs)
+                            {
+                                return backupService.GetBackupDescriptors(BackupMedia.Public).Skip(index).First();
+                            }
+                            else
+                            {
+                                Console.WriteLine("Invalid input - please enter valid option");
+                            }
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                Console.WriteLine();
+            }
+        }
+
         /// <summary>
         /// Re-Encrypt the ALE services
         /// </summary>
@@ -449,27 +570,9 @@ namespace SanteDB.Dcg
         {
             ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount;
 
-            var configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "santedb", "dcg", parms.InstanceName);
-            var dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "santedb", "dcg", parms.InstanceName);
-
-            // Running as system?
-            if (configDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)))
-            {
-                configDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "config");
-                dataDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "data");
-            }
-
+            GetDirectories(parms, out var configDirectory, out var dataDirectory);
             Trace.TraceInformation("Configuration Directory: {0}", configDirectory);
             Trace.TraceInformation("Data Directory: {0}", dataDirectory);
-
-            if (!Directory.Exists(dataDirectory))
-            {
-                Directory.CreateDirectory(dataDirectory);
-            }
-            if (!Directory.Exists(configDirectory))
-            {
-                Directory.CreateDirectory(configDirectory);
-            }
 
             // Security Application Information
             var applicationIdentity = new UpstreamCredentialConfiguration()
@@ -500,5 +603,34 @@ namespace SanteDB.Dcg
 
             return new GatewayApplicationContext(parms, configurationManager);
         }
+
+        /// <summary>
+        /// Get directories
+        /// </summary>
+        private static void GetDirectories(ConsoleParameters parms, out string configDirectory, out string dataDirectory)
+        {
+
+            configDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "santedb", "dcg", parms.InstanceName);
+            dataDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "santedb", "dcg", parms.InstanceName);
+
+            // Running as system?
+            if (configDirectory.Contains(Environment.GetFolderPath(Environment.SpecialFolder.Windows)) || parms.AsSystem)
+            {
+                configDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "config");
+                dataDirectory = Path.Combine(Path.GetDirectoryName(typeof(Program).Assembly.Location), "instances", parms.InstanceName, "data");
+            }
+
+
+            if (!Directory.Exists(dataDirectory))
+            {
+                Directory.CreateDirectory(dataDirectory);
+            }
+            if (!Directory.Exists(configDirectory))
+            {
+                Directory.CreateDirectory(configDirectory);
+            }
+
+        }
+
     }
 }

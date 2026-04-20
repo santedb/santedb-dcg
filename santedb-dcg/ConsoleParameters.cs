@@ -82,6 +82,13 @@ namespace SanteDB.Dcg
         public bool Reset { get; set; }
 
         /// <summary>
+        /// Restore from the specified directory
+        /// </summary>
+        [Description("Restore the DCG configuration from a backup")]
+        [Parameter("restore")]
+        public bool Restore { get; set; }
+
+        /// <summary>
         /// Set the application name
         /// </summary>
         [Description("Sets the identity of the application (for OAUTH) for this instance")]
@@ -129,6 +136,13 @@ namespace SanteDB.Dcg
         [Parameter("bindcert")]
         [Description("Bind a certificate to the HTTPs port")]
         public bool AutoBindCertificate { get; set; }
+
+        /// <summary>
+        /// Run a system - treat as running as system
+        /// </summary>
+        [Parameter("system")]
+        [Description("Instructs the DCG to store instance data in the %installdir%\\instances folder (default if running as SYSTEM)")]
+        public bool AsSystem { get; set; }
 
         /// <summary>
         /// Rotate the keys used for encryption

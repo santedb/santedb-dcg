@@ -47,6 +47,14 @@ namespace SanteDB.Dcg
             };
         }
 
+        /// <summary>
+        /// DCG cannot do this
+        /// </summary>
+        protected override void AutoRestoreEnvironment()
+        {
+            this.m_tracer.TraceInfo("Auto-restore on the DCG is performed via the command line - skipping auto-restore");
+        }
+
         /// <inheritdoc/>
         protected override void OnRestartRequested(object sender)
         {
