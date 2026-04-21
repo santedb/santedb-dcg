@@ -45,6 +45,7 @@ using SanteDB.OrmLite.Providers;
 using SanteDB.Security.Certs.BouncyCastle;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
 using System.Data.Odbc;
 using System.Diagnostics;
@@ -194,13 +195,24 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Restore)
                 {
+                    GetDirectories(parms, out var cData, out var appData);
+                    if (File.Exists(Path.Combine(cData, "santedb.config")))
+                    {
+                        Console.WriteLine("You cannot use this restore function on an already configured Gateway - please launch the gateway and restore from the web interface");
+                        return;
+                    }
+
                     var context = CreateContext(parms);
+
                     using (AuthenticationContext.EnterSystemContext())
                     {
                         var backupServiceManager = context.GetService<IBackupService>();
                         var configurationManager = context.GetService<IConfigurationManager>();
                         var symmEncryption = context.GetService<ISymmetricCryptographicProvider>();
                         var uiProvider = new ConsoleUserInterfaceInteractionProvider();
+
+                        Console.WriteLine("Preparing the restoration environment...");
+                        ServiceUtil.Start(Guid.NewGuid(), context);
 
                         // List backup files
                         IBackupDescriptor restoreDescriptor = null;
@@ -216,7 +228,6 @@ namespace SanteDB.Dcg
 
                         if (!(configurationManager is InitialConfigurationManager) && uiProvider.Confirm($"This gateway already contains a configuration for {parms.InstanceName} - do you want to reset the environment configuration before restoring?"))
                         {
-                            GetDirectories(parms, out var cData, out var appData);
                             if (Directory.Exists(cData)) Directory.Delete(cData, true);
                             if (Directory.Exists(appData)) Directory.Delete(appData, true);
                         }
@@ -230,11 +241,13 @@ namespace SanteDB.Dcg
                             {
                                 irpc.ProgressChanged += (o, e) =>
                                 {
-                                    Console.WriteLine($"{e.Progress:%} - {e.State}");
+                                    Console.SetCursorPosition(0, Console.CursorTop);
+                                    Console.Write($"{e.Progress:#%} - Restoring Environment");
                                 };
                             }
+                            Console.WriteLine();
                             backupServiceManager.Restore(BackupMedia.Public, restoreDescriptor.Label, backupSecret);
-                            Console.WriteLine("Environment restored");
+                            Console.WriteLine("\r\nEnvironment restored");
                         }
                         catch (Exception e)
                         {

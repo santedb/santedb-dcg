@@ -184,6 +184,10 @@ namespace SanteDB.Dcg
             {
                 yield return $"--appsecret=\"{this.ApplicationSecret}\"";
             }
+            if(this.AsSystem)
+            {
+                yield return "--system";
+            }
 
         }
     }
