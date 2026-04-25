@@ -28,9 +28,12 @@ namespace SanteDB.Dcg.Configuration
         {
             var appSection = existing.GetSection<ApplicationServiceContextConfigurationSection>();
             appSection.ServiceProviders.RemoveAll(o => o.Type.Implements(typeof(IUserInterfaceInteractionProvider)));
-
             appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.Impl.TracerUserInterfaceInteractionProvider)));
             appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.WebAppletHostBridgeProvider)));
+
+#if DEBUG
+            appSection.AllowUnsignedAssemblies = true;
+#endif 
             var agsSection = existing.GetSection<RestConfigurationSection>();
             if (agsSection != null)
             {
