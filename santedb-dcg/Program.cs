@@ -141,7 +141,7 @@ namespace SanteDB.Dcg
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceWarning("CAnnot detect Windows Event Log {0}", e.ToHumanReadableString());
+                    Trace.TraceWarning("Cannot detect Windows Event Log {0}", e.ToHumanReadableString());
                 }
 
                 ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, error) =>
@@ -195,6 +195,7 @@ namespace SanteDB.Dcg
                 }
                 else if (parms.Restore)
                 {
+                    Console.WriteLine("Starting restoration process");
                     GetDirectories(parms, out var cData, out var appData);
                     if (File.Exists(Path.Combine(cData, "santedb.config")))
                     {
@@ -206,12 +207,12 @@ namespace SanteDB.Dcg
 
                     using (AuthenticationContext.EnterSystemContext())
                     {
+                        Console.WriteLine("Preparing the restoration environment...");
                         var backupServiceManager = context.GetService<IBackupService>();
                         var configurationManager = context.GetService<IConfigurationManager>();
                         var symmEncryption = context.GetService<ISymmetricCryptographicProvider>();
                         var uiProvider = new ConsoleUserInterfaceInteractionProvider();
 
-                        Console.WriteLine("Preparing the restoration environment...");
                         ServiceUtil.Start(Guid.NewGuid(), context);
 
                         // List backup files
@@ -400,7 +401,8 @@ namespace SanteDB.Dcg
 
 #else
                 Trace.TraceError("Error encountered: {0}. Will terminate", e.Message);
-                EventLog.WriteEntry("SanteDB Gateway Process", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
+                Console.WriteLine("011 899 981 199 911 9725 3!!! {0}", e.ToString());
+                EventLog.WriteEntry("SanteDB", $"Fatal service error: {e}", EventLogEntryType.Error, 911);
 #endif
                 Environment.Exit(911);
             }
@@ -584,8 +586,8 @@ namespace SanteDB.Dcg
             ServicePointManager.DefaultConnectionLimit = Environment.ProcessorCount;
 
             GetDirectories(parms, out var configDirectory, out var dataDirectory);
-            Trace.TraceInformation("Configuration Directory: {0}", configDirectory);
-            Trace.TraceInformation("Data Directory: {0}", dataDirectory);
+            Console.WriteLine("Configuration Directory: {0}", configDirectory);
+            Console.WriteLine("Data Directory: {0}", dataDirectory);
 
             // Security Application Information
             var applicationIdentity = new UpstreamCredentialConfiguration()
@@ -596,6 +598,7 @@ namespace SanteDB.Dcg
                 CredentialType = UpstreamCredentialType.Application
             };
 
+            Console.WriteLine("Initializing the environment...", dataDirectory);
             ClientBatteries.Initialize(dataDirectory, configDirectory, applicationIdentity);
             // Establish a configuration environment 
             IConfigurationManager configurationManager = null;
@@ -609,6 +612,7 @@ namespace SanteDB.Dcg
                 configurationManager = new InitialConfigurationManager(SanteDBHostType.Gateway, parms.InstanceName, configurationFile);
             }
 
+            Console.WriteLine("Construct context with {0}...", configurationManager.GetType());
 #if DEBUG
             // TODO: Git Submodules would eliminate this
             configurationManager.Configuration.GetSection<ApplicationServiceContextConfigurationSection>().AllowUnsignedAssemblies = true;
