@@ -24,7 +24,7 @@ namespace SanteDB.Dcg
 
 
         /// <inheritdoc/>
-        public GatewayApplicationContext(ConsoleParameters debugParameters, IConfigurationManager configurationManager) : base(SanteDBHostType.Gateway, debugParameters.InstanceName, configurationManager)
+        public GatewayApplicationContext(ConsoleParameters debugParameters, IConfigurationManager configurationManager) : base(debugParameters.Restore ? SanteDBHostType.Test : SanteDBHostType.Gateway, debugParameters.InstanceName, configurationManager)
         {
             this.m_configurationManager = configurationManager;
             this.m_consoleParameters = debugParameters;
