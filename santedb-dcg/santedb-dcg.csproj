@@ -31,7 +31,7 @@
 		<AssemblyTitle>santedb-dcg</AssemblyTitle>
 		<Product>santedb-dcg</Product>
 		<Copyright>Copyright (C) 2020-2025 SanteSuite Contributors (see NOTICE)</Copyright>
-		<InformationalVersion>Alberta</InformationalVersion>
+		<InformationalVersion>Chippewa</InformationalVersion>
 		<FileAlignment>512</FileAlignment>
 		<FileVersion>$(VersionNumberInfo)</FileVersion>
 		<Version>$(VersionNumberInfo)</Version>
