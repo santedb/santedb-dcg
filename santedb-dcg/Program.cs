@@ -415,6 +415,7 @@ namespace SanteDB.Dcg
         {
             try
             {
+                var backupDescriptors = backupService.GetBackupDescriptors(BackupMedia.Public).OrderByDescending(o => o.Timestamp).Take(9).ToArray();
                 var backupConfig = configurationManager.GetSection<BackupConfigurationSection>();
                 var hasShownOptions = false;
                 var ofs = 0;
@@ -423,7 +424,7 @@ namespace SanteDB.Dcg
                     if (!hasShownOptions)
                     {
                         Console.WriteLine("Available Backups in {0}:", backupConfig.PublicBackupLocation);
-                        foreach (var itm in backupService.GetBackupDescriptors(BackupMedia.Public).OrderByDescending(o => o.Timestamp).Take(9))
+                        foreach (var itm in backupDescriptors)
                         {
                             Console.WriteLine("\t({0}) - {1} created {2:o}", ofs++, itm.Label, itm.Timestamp);
                         }
@@ -458,7 +459,7 @@ namespace SanteDB.Dcg
                         default:
                             if (Int32.TryParse(key.KeyChar.ToString(), out var index) && index < ofs)
                             {
-                                return backupService.GetBackupDescriptors(BackupMedia.Public).Skip(index).First();
+                                return backupDescriptors[index];
                             }
                             else
                             {

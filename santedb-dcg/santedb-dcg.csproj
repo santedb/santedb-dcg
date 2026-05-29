@@ -31,7 +31,7 @@
 		<AssemblyTitle>santedb-dcg</AssemblyTitle>
 		<Product>santedb-dcg</Product>
 		<Copyright>Copyright (C) 2020-2025 SanteSuite Contributors (see NOTICE)</Copyright>
-		<InformationalVersion>Alberta</InformationalVersion>
+		<InformationalVersion>Chippewa</InformationalVersion>
 		<FileAlignment>512</FileAlignment>
 		<FileVersion>$(VersionNumberInfo)</FileVersion>
 		<Version>$(VersionNumberInfo)</Version>
@@ -53,7 +53,7 @@
 		<PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="9.1.1" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.0" />
 		<PackageReference Include="Npgsql" Version="8.0.6" />
-		<PackageReference Include="SanteDB.Build.Tasks" Version="3.0.2032-alpha6" />
+		<PackageReference Include="SanteDB.Build.Tasks" Version="3.0.2046-alpha" />
 		<PackageReference Include="SQLitePCLRaw.provider.dynamic_cdecl" Version="2.1.8" />
 		<PackageReference Include="SQLiteSpellfix.lib.e_sqlite3mc" Version="2.2.0" />
 		<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.1" />
