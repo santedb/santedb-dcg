@@ -175,6 +175,11 @@ namespace SanteDB.Dcg
 
                 if (parms.ShowHelp)
                     parser.WriteHelp(Console.Out);
+                else if(parms.InstallCerts)
+                {
+                    Console.WriteLine("Installing security certificates...");
+                    SecurityExtensions.InstallCertsForChain();
+                }
                 else if (parms.ReEncrypt)
                 {
                     if (ServiceTools.ServiceInstaller.ServiceIsInstalled(serviceName) &&

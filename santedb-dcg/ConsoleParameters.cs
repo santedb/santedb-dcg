@@ -152,6 +152,13 @@ namespace SanteDB.Dcg
         public bool ReEncrypt { get; set; }
 
         /// <summary>
+        /// Certificates installation
+        /// </summary>
+        [Parameter("install-certs")]
+        [Description("Install the certificiates")]
+        public bool InstallCerts { get; set; }
+
+        /// <summary>
         /// Convert this object back to an argument list
         /// </summary>
         internal IEnumerable<String> ToArgumentList()
