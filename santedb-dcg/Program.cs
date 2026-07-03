@@ -527,7 +527,7 @@ namespace SanteDB.Dcg
 
                     // If ALE is enabled then we want to recrypt
                     var processedConnections = new List<String>();
-                    foreach (var ormConfiguration in configuration.Sections.OfType<OrmConfigurationBase>())
+                    foreach (var ormConfiguration in configuration.Sections.OfType<OrmAleConfigurationBase>())
                     {
                         if (ormConfiguration?.AleConfiguration?.AleEnabled != true)
                             continue;
