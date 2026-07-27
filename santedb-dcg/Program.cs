@@ -61,7 +61,6 @@ using System.ServiceProcess;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ZstdSharp.Unsafe;
 
 [assembly: Guid("E65AB546-1345-42E7-82D2-0914336CD71E")]
 namespace SanteDB.Dcg
