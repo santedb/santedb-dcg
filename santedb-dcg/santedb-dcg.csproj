@@ -50,7 +50,6 @@
 		<Content Include="icon.ico" />
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="9.1.1" />
 		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.0" />
 		<PackageReference Include="Npgsql" Version="8.0.6" />
 		<PackageReference Include="SanteDB.Build.Tasks" Version="3.0.2046-alpha" />
