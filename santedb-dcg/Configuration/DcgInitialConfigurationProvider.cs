@@ -1,13 +1,14 @@
 ﻿using SanteDB.Client.Configuration;
-using SanteDB.Core.Configuration;
+using SanteDB.Client.UserInterface;
 using SanteDB.Core;
+using SanteDB.Core.Applets.Configuration;
+using SanteDB.Core.Configuration;
 using SanteDB.Rest.Common.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SanteDB.Client.UserInterface;
 
 namespace SanteDB.Dcg.Configuration
 {
@@ -28,12 +29,14 @@ namespace SanteDB.Dcg.Configuration
         {
             var appSection = existing.GetSection<ApplicationServiceContextConfigurationSection>();
             appSection.ServiceProviders.RemoveAll(o => o.Type.Implements(typeof(IUserInterfaceInteractionProvider)));
-            appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.Impl.TracerUserInterfaceInteractionProvider)));
-            appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.WebAppletHostBridgeProvider)));
 
 #if DEBUG
             appSection.AllowUnsignedAssemblies = true;
+            var appletSection = existing.GetSection<AppletConfigurationSection>();
+            appletSection.AllowUnsignedApplets = true;
 #endif 
+            appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.Impl.TracerUserInterfaceInteractionProvider)));
+            appSection.ServiceProviders.Add(new TypeReferenceConfiguration(typeof(SanteDB.Client.UserInterface.WebAppletHostBridgeProvider)));
             var agsSection = existing.GetSection<RestConfigurationSection>();
             if (agsSection != null)
             {

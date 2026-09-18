@@ -17,19 +17,23 @@
  * User: Justin Fyfe
  * Date: 2019-8-8
  */
-using SanteDB.Client.Configuration;
-using SanteDB.Core;
-using SanteDB.Core.Configuration;
-using SanteGuard.Messaging.Syslog.Action;
-using SanteGuard.Messaging.Syslog.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace SanteDB.Dcg.Configuration
 {
+#if false
+
+    using SanteDB.Client.Configuration;
+    using SanteDB.Core;
+    using SanteDB.Core.Configuration;
+    using SanteGuard.Messaging.Syslog.Action;
+    using SanteGuard.Messaging.Syslog.Configuration;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Initial configuration provider for SanteGuard
     /// </summary>
@@ -70,6 +74,6 @@ namespace SanteDB.Dcg.Configuration
 
             return existing;
         }
-
     }
+#endif
 }

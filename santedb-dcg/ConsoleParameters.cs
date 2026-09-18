@@ -159,6 +159,13 @@ namespace SanteDB.Dcg
         public bool InstallCerts { get; set; }
 
         /// <summary>
+        /// Load extensions
+        /// </summary>
+        [Parameter("load")]
+        [Description("Load extensions into the DCG host")]
+        public StringCollection LoadExtensions { get; set; }
+
+        /// <summary>
         /// Convert this object back to an argument list
         /// </summary>
         internal IEnumerable<String> ToArgumentList()
