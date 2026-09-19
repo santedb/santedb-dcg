@@ -93,7 +93,10 @@ $SUDO mkdir -p $INSTALL_ROOT
 
 echo "Copying Files"
 $SUDO cp -rf * $INSTALL_ROOT
-$SUDO certmgr -add -c -m CA inter.cer
+
+if [ -f "inter.cer" ]; then
+    $SUDO certmgr -add -c -m CA inter.cer
+fi
 
 read_yesno "Do you want me to install SanteDB dCDR Access Gateway as a daemon?" daemon
 
