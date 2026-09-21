@@ -3,6 +3,7 @@
 
 declare INSTALL_ROOT='/opt/santesuite/santedb/dcg'
 declare SUDO=''
+declare AUTO_START=0
 
 exit_on_error() {
     exit_code=$1
@@ -88,6 +89,13 @@ then
     $INSTALL_ROOT = $installAlt
 fi
 
+
+if [ -f /run/santedb-dcg.pid ]; then 
+    echo "Stopping SanteDB DCG Service"
+    $SUDO systemctl stop santedb-dcg
+    AUTO_START=1
+fi;
+
 echo "Installing at $INSTALL_ROOT"
 $SUDO mkdir -p $INSTALL_ROOT
 
@@ -98,11 +106,16 @@ if [ -f "inter.cer" ]; then
     $SUDO certmgr -add -c -m CA inter.cer
 fi
 
-read_yesno "Do you want me to install SanteDB dCDR Access Gateway as a daemon?" daemon
 
-if [[ "$daemon" =~ ^[yY]$ ]]
-then 
-    cat > /tmp/santedb-www.service <<EOF
+if (( $AUTO_START != 0 )); then
+    echo "Restarting SanteDB DCG"
+    $SUDO systemctl start santedb-dcg
+else 
+    read_yesno "Do you want me to install SanteDB dCDR Access Gateway as a daemon?" daemon
+
+    if [[ "$daemon" =~ ^[yY]$ ]]
+    then 
+        cat > /tmp/santedb-dcg.service <<EOF
 [Unit]
 Description=SanteDB dCDR Access Gateway
 
@@ -117,40 +130,41 @@ ExecStop=kill -sKILL $MAINPID
 WantedBy=multi-user.target
 EOF
 
-    $SUDO mv /tmp/santedb-dcg.service /etc/systemd/system/santedb-dcg.service
+        $SUDO mv /tmp/santedb-dcg.service /etc/systemd/system/santedb-dcg.service
 
-    read_yesno "Do you want SanteDB Access Gateway to start when the system starts?" autostart
-    if [[ "$autostart" =~ ^[Yy]$ ]]
-    then 
-        $SUDO systemctl enable santedb-dcg
+        read_yesno "Do you want SanteDB Access Gateway to start when the system starts?" autostart
+        if [[ "$autostart" =~ ^[Yy]$ ]]
+        then 
+            $SUDO systemctl enable santedb-dcg
+        fi
+
+        echo -e "\n
+
+        SanteDB Web Access Gateway is now installed in $INSTALL_ROOT
+
+        START SANTEDB: 
+        systemctl start santedb-dcg
+
+        STOP SANTEDB: 
+        systemctl stop santedb-dcg
+        
+        Visit http://127.0.0.1:9200 to configure SanteDB Access Gateway
+        "
+        $SUDO systemctl start santedb-dcg
+    else 
+
+        echo -e "\n
+
+        SanteDB is now installed in $INSTALL_ROOT
+
+        START SANTEDB: 
+        sudo mono-service -d:$INSTALL_ROOT $INSTALL_ROOT/santedb-dcg.exe --console --daemon --dllForce
+
+        STOP SANTEDB: 
+        kill \`cat /tmp/santedb-dcg.exe.lock\`
+        
+        Visit http://127.0.0.1:9200 to configure SanteDB Access Gateway
+        "
+
     fi
-
-    echo -e "\n
-
-    SanteDB Web Access Gateway is now installed in $INSTALL_ROOT
-
-    START SANTEDB: 
-    systemctl start santedb-dcg
-
-    STOP SANTEDB: 
-    systemctl stop santedb-dcg
-	
-	Visit http://127.0.0.1:9200 to configure SanteDB Access Gateway
-    "
-	$SUDO systemctl start santedb-dcg
-else 
-
-    echo -e "\n
-
-    SanteDB is now installed in $INSTALL_ROOT
-
-    START SANTEDB: 
-    sudo mono-service -d:$INSTALL_ROOT $INSTALL_ROOT/santedb-dcg.exe --console --daemon --dllForce
-
-    STOP SANTEDB: 
-    kill \`cat /tmp/santedb-dcg.exe.lock\`
-	
-	Visit http://127.0.0.1:9200 to configure SanteDB Access Gateway
-    "
-
 fi
