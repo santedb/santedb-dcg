@@ -57,7 +57,7 @@ namespace SanteDB.Dcg.Configuration
                 {
                     DefaultResponseFormat = FhirResponseFormatConfiguration.Json,
                     PersistElementId = true,
-                    ResourceBaseUri = serviceUrlBase
+                    BaseUri = serviceUrlBase
                 });
 
                 // Add the rest configuration
